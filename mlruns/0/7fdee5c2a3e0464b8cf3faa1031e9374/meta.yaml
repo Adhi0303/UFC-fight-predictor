@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/0/7fdee5c2a3e0464b8cf3faa1031e9374/artifacts
+end_time: 1779353026493
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 7fdee5c2a3e0464b8cf3faa1031e9374
+run_name: hilarious-lamb-314
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1779353019628
+status: 4
+tags: []
+user_id: suriy
