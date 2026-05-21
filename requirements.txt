@@ -1,0 +1,16 @@
+pandas
+numpy
+scikit-learn
+xgboost
+mlflow
+dvc
+pyyaml
+matplotlib
+plotly
+jupyter
+notebook
+fastapi
+uvicorn
+requests
+beautifulsoup4
+lxml
