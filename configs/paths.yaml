@@ -1,0 +1,10 @@
+data:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+
+models:
+  trained: models/
+
+logs:
+  dir: logs/  

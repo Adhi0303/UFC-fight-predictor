@@ -1,0 +1,12 @@
+model:
+  name: xgboost
+
+training:
+  test_size: 0.2
+  random_state: 42
+
+xgboost:
+  learning_rate: 0.01
+  max_depth: 6
+  n_estimators: 200
+  subsample: 0.8
