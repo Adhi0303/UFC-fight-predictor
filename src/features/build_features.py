@@ -29,7 +29,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     
     leakage_columns = [
         'finish', 'finish_details', 'finish_round', 'finish_round_time',
-        'total_fight_time_secs', 'location', 'country', 'title_bout' 
+        'total_fight_time_secs', 'location', 'country', 'title_bout', 'empty_arena'
         # (We keep title_bout if we want to use it as a context feature, 
         # but let's drop non-predictive metadata)
     ]
@@ -92,7 +92,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     logger.info("One-hot encoding categorical variables...")
     
     # Identify the text columns we want to encode
-    categorical_cols = ['weight_class', 'R_Stance', 'B_Stance', 'gender']
+    categorical_cols = ['weight_class', 'R_Stance', 'B_Stance', 'gender', 'better_rank']
     
     # pd.get_dummies automatically converts text columns into 1s and 0s
     features_df = pd.get_dummies(
@@ -101,10 +101,11 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         drop_first=True # Drops one category to avoid the "dummy variable trap" (multicollinearity)
     )
 
-    # Finally, we drop identifiers that the model can't learn from
-    # E.g., The model can't mathematically use names or exact dates to predict general rules.
-    final_drop_cols = ['R_fighter', 'B_fighter', 'date']
-    features_df = features_df.drop(columns=final_drop_cols, errors='ignore')
+    # Note: We retain 'R_fighter', 'B_fighter', and 'date' for now!
+    # These act as metadata. They will NOT be used by the model for training (as they are text/dates),
+    # but we need them in our dataset so we can split the data chronologically by date in the next phase,
+    # and so we can know *who* fought whom when evaluating the model.
+    # The training script will drop these specific columns right before feeding data into the algorithm.
     
     logger.info(f"Feature Engineering Complete! Final shape: {features_df.shape}")
     
