@@ -49,12 +49,12 @@ class FighterProfile:
         
         # Win distributions (KO, Sub, Dec)
         self.ko_wins = len(wins_r[wins_r['finish'] == 'KO/TKO']) + len(wins_b[wins_b['finish'] == 'KO/TKO'])
-        self.sub_wins = len(wins_r[wins_r['finish'] == 'Submission']) + len(wins_b[wins_b['finish'] == 'Submission'])
+        self.sub_wins = len(wins_r[wins_r['finish'] == 'SUB']) + len(wins_b[wins_b['finish'] == 'SUB'])
         self.dec_wins = self.total_wins - (self.ko_wins + self.sub_wins) # Group decisions/DQs
         
         # Loss distributions (durability)
         self.ko_losses = len(losses_r[losses_r['finish'] == 'KO/TKO']) + len(losses_b[losses_b['finish'] == 'KO/TKO'])
-        self.sub_losses = len(losses_r[losses_r['finish'] == 'Submission']) + len(losses_b[losses_b['finish'] == 'Submission'])
+        self.sub_losses = len(losses_r[losses_r['finish'] == 'SUB']) + len(losses_b[losses_b['finish'] == 'SUB'])
         self.dec_losses = self.total_losses - (self.ko_losses + self.sub_losses)
 
         # Career stats lookup (from the most recent fight)

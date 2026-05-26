@@ -5,7 +5,19 @@ const WEIGHT_CLASSES = ['All', 'Flyweight', 'Bantamweight', 'Featherweight', 'Li
 
 const FighterCard = ({ f, isRed, isBlue, isSelected, onClick }) => {
   const [imgError, setImgError] = useState(false)
-  const formattedName = f.name.replace(/ /g, '_')
+  const imageUrl = f.image_url || ''
+
+  const handleImageError = (e) => {
+    console.error(`[SelectionScreen - Image Load Failed] Fighter: "${f.name}"`);
+    console.error(`  → Attempted URL: ${imageUrl || 'NO URL PROVIDED'}`);
+    console.error(`  → Error event:`, e);
+    console.error(`  → Fighter data:`, f);
+    setImgError(true);
+  };
+
+  const handleImageLoad = () => {
+    console.log(`[SelectionScreen - Image Loaded] Fighter: "${f.name}"`);
+  };
 
   return (
     <button
@@ -18,11 +30,12 @@ const FighterCard = ({ f, isRed, isBlue, isSelected, onClick }) => {
       }`}
     >
       {/* Fighter Image */}
-      {!imgError && (
+      {imageUrl && !imgError && (
         <img 
-          src={`/fighters/${formattedName}.png`} 
+          src={imageUrl}
           alt={f.name}
-          onError={() => setImgError(true)}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
           className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
         />
       )}
@@ -36,7 +49,7 @@ const FighterCard = ({ f, isRed, isBlue, isSelected, onClick }) => {
       {isBlue && <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-blueCorner shadow-neon-blue"></div>}
       
       {/* Silhouette Fallback */}
-      {imgError && (
+      {(!imageUrl || imgError) && (
         <div className="absolute inset-0 z-[-1] flex items-center justify-center opacity-20 group-hover:opacity-40 transition-opacity">
           <User className="w-16 h-16" />
         </div>
@@ -86,10 +99,10 @@ export default function SelectionScreen({ fighters, onPredict, loading }) {
           <button
             key={wc}
             onClick={() => setActiveWeightClass(wc)}
-            className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider transition-all snap-start ${
+            className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-300 transform snap-start ${
               activeWeightClass === wc 
-                ? 'bg-gold text-background shadow-[0_0_15px_rgba(229,169,59,0.5)]' 
-                : 'glass-panel text-textSecondary hover:text-textPrimary hover:bg-surface/80'
+                ? 'bg-gold text-background shadow-[0_0_15px_rgba(229,169,59,0.5)] scale-110' 
+                : 'glass-panel text-textSecondary hover:text-textPrimary hover:bg-surface/80 hover:scale-105 hover:shadow-md'
             }`}
           >
             {wc}
@@ -149,9 +162,16 @@ export default function SelectionScreen({ fighters, onPredict, loading }) {
         <button
           onClick={handleFight}
           disabled={!rFighter || !bFighter || loading}
-          className="px-12 py-4 bg-gold text-background font-heading font-bold uppercase tracking-[0.2em] rounded-xl hover:bg-white hover:text-gold hover:shadow-[0_0_30px_rgba(229,169,59,0.8)] transition-all disabled:opacity-30 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 whitespace-nowrap"
+          className={`px-12 py-4 bg-gold text-background font-heading font-bold uppercase tracking-[0.2em] rounded-xl transition-all duration-300 transform disabled:opacity-30 disabled:cursor-not-allowed whitespace-nowrap relative overflow-hidden group ${
+            !rFighter || !bFighter || loading 
+              ? '' 
+              : 'hover:bg-white hover:text-gold hover:shadow-[0_0_30px_rgba(229,169,59,0.8)] hover:scale-110 active:scale-95'
+          }`}
         >
-          {loading ? 'Simulating...' : 'Fight!'}
+          {!loading && rFighter && bFighter && (
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+          )}
+          <span className="relative z-10">{loading ? 'Simulating...' : 'Fight!'}</span>
         </button>
 
         <div className="flex items-center justify-end gap-4 flex-1 w-full text-right">
