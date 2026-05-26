@@ -75,8 +75,8 @@ jobs:
           # Stage the updated files (using -f to force add them if they are in .gitignore)
           git add -f data/raw/original/ufc-master.csv
           git add -f data/processed/ufc-ml-features.csv || true
-          git add models/xgboost_model.pkl
-          git add mlflow.db || true  # Ignore if mlflow.db doesn't exist
+          git add -f models/xgboost_model.pkl
+          git add -f mlflow.db || true  # Ignore if mlflow.db doesn't exist
           
           # Check if there are any changes to commit
           if git diff --staged --quiet; then
