@@ -1,4 +1,4 @@
-import { ChevronLeft, Zap, Target, Flame, TrendingUp } from 'lucide-react'
+import { ChevronLeft, Zap, Target, Flame, TrendingUp, Clock } from 'lucide-react'
 
 // Simple horizontal bar chart
 function MethodBar({ label, rPct, bPct }) {
@@ -13,6 +13,50 @@ function MethodBar({ label, rPct, bPct }) {
         <div className="h-full bg-redCorner transition-all duration-1000" style={{ width: `${rPct}%` }} />
         <div className="h-full bg-blueCorner transition-all duration-1000" style={{ width: `${bPct}%` }} />
       </div>
+    </div>
+  )
+}
+
+function RoundByRoundChart({ rFinishes, bFinishes, rounds }) {
+  const maxRound = rounds || 3
+  const roundData = []
+  
+  for (let r = 1; r <= maxRound; r++) {
+    const rPct = Math.round((rFinishes[r] || 0) * 100)
+    const bPct = Math.round((bFinishes[r] || 0) * 100)
+    roundData.push({ round: r, rPct, bPct })
+  }
+  
+  const maxPct = Math.max(...roundData.map(d => Math.max(d.rPct, d.bPct)), 10)
+  
+  return (
+    <div className="space-y-4">
+      {roundData.map(({ round, rPct, bPct }) => (
+        <div key={round} className="flex items-center gap-3">
+          <div className="text-xs font-bold text-textSecondary uppercase tracking-widest w-16">
+            Round {round}
+          </div>
+          <div className="flex-1 flex items-center gap-2">
+            <div className="flex-1 flex justify-end">
+              <div 
+                className="h-8 bg-redCorner transition-all duration-1000 flex items-center justify-end pr-2"
+                style={{ width: `${(rPct / maxPct) * 100}%` }}
+              >
+                {rPct > 0 && <span className="text-white text-xs font-bold">{rPct}%</span>}
+              </div>
+            </div>
+            <div className="w-px h-8 bg-border" />
+            <div className="flex-1 flex justify-start">
+              <div 
+                className="h-8 bg-blueCorner transition-all duration-1000 flex items-center justify-start pl-2"
+                style={{ width: `${(bPct / maxPct) * 100}%` }}
+              >
+                {bPct > 0 && <span className="text-white text-xs font-bold">{bPct}%</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -156,6 +200,22 @@ export default function AnalysisScreen({ prediction, onBack }) {
               <StatPanel title="Historical Wins" rVal={p.stats.R.wins} bVal={p.stats.B.wins} />
               <StatPanel title="Avg Match Rounds" rVal={p.simulation.avg_rounds} bVal={p.simulation.avg_rounds} inverseGood />
             </div>
+          </div>
+
+          {/* Round-by-Round Finish Probability */}
+          <div className="col-span-1 lg:col-span-2 bg-white border-2 border-background shadow-sm p-6">
+            <div className="flex items-center gap-2 mb-6 border-b border-border pb-4">
+              <Clock className="w-5 h-5 text-ufcRed" />
+              <h3 className="font-heading font-black text-2xl uppercase tracking-tighter">Round-by-Round Finish Probability</h3>
+            </div>
+            <p className="text-textSecondary text-xs mb-6 uppercase tracking-wider font-bold">
+              Likelihood of fight ending by finish (KO/TKO or Submission) in each round
+            </p>
+            <RoundByRoundChart 
+              rFinishes={p.simulation.R_finishes_by_round || {}} 
+              bFinishes={p.simulation.B_finishes_by_round || {}} 
+              rounds={p.simulation.avg_rounds > 3 ? 5 : 3}
+            />
           </div>
 
           {/* Explanatory Note */}

@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: web_app/backend/Dockerfile
+    container_name: ufc-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ODDS_API_KEY=${ODDS_API_KEY}
+      - KAGGLE_API_TOKEN=${KAGGLE_API_TOKEN}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./web_app/backend:/app/web_app/backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./web_app/frontend
+      dockerfile: Dockerfile
+    container_name: ufc-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  default:
+    name: ufc-network
