@@ -26,59 +26,69 @@ For each step, we highlight **what you are learning** and **what code is being w
 
 ---
 
-## ⏳ Phase 2: Feature Engineering (Next Up)
-**Goal:** Transform raw data into intelligent, predictive features. *This is where the real "intelligence" happens!*
+## ✅ Phase 2: Feature Engineering (Completed)
+**Goal:** Transform raw data into intelligent, predictive features.
 * [x] **2.1 Differential Features (`build_features.py`):** Code features that compare fighters (e.g., `reach_diff = R_reach - B_reach`, `age_diff`).
-  * *Learning concept:* Fights are matchups. The model learns better from relative advantages than raw numbers.
-* [x] **2.2 Target Encoding (`build_features.py`):** Convert the "Winner" column (Red/Blue/Draw) into numerical values (1/0).
-  * *Learning concept:* ML models only understand numbers. We have to map text categories to binary outcomes for classification.
+* [x] **2.2 Target Encoding (`build_features.py`):** Convert the "Winner" column (Red/Blue) into numerical values (1/0).
 * [x] **2.3 Categorical Encoding (`build_features.py`):** Convert categorical data like `Stance` or `weight_class` into numeric representations (One-Hot Encoding).
-  * *Learning concept:* Transforming text properties into separate binary columns so the model can process them mathematically.
 * [x] **2.4 Leakage Prevention Check:** Drop columns that contain post-fight information (like `finish_method` or `rounds_fought`).
-  * *Learning concept:* "Data Leakage" is when you accidentally feed the model information from the future that it wouldn't know before the fight begins. This makes models look 100% accurate in testing but fail in reality.
+> **💡 What you learned:** Matchups matter most. Differential features capture relative advantages. Dropping post-fight stats prevents "Data Leakage" where the model implicitly cheats by looking at the future.
 
 ---
 
-## ⏳ Phase 3: Exploratory Data Analysis (EDA)
+## ✅ Phase 3: Exploratory Data Analysis (EDA) (Completed)
 **Goal:** Discover patterns and correlations visually.
-* [ ] **3.1 Distribution Analysis (`notebooks/eda.ipynb`):** Plot age distributions, reach advantages, and their impact on win rates.
-  * *Learning concept:* Understanding the statistical realities of the sport (e.g., does a 5+ year age gap drastically reduce win probability?).
-* [ ] **3.2 Correlation Mapping (`notebooks/eda.ipynb`):** Build a heatmap to see which features correlate most strongly with winning.
-  * *Learning concept:* Identifying which variables naturally influence the target variable, which helps guide what features to keep or drop.
+* [x] **3.1 Distribution Analysis (`notebooks/eda.ipynb`):** Plot age distributions, reach advantages, and their impact on win rates.
+* [x] **3.2 Correlation Mapping (`notebooks/eda.ipynb`):** Build a heatmap to see which features correlate most strongly with winning.
+* [x] **3.3 Model Visualization (`notebooks/model_comparison.ipynb`):** Visualized 2D decision boundaries to compare linear vs. non-linear models.
+> **💡 What you learned:** Visualizing data highlights major relationships (like Vegas odds and age gaps being highly correlated with win rate) and illustrates how different algorithms carve out decision boundaries.
 
 ---
 
-## ⏳ Phase 4: Baseline Machine Learning Models
+## ✅ Phase 4: Baseline Machine Learning Models (Completed)
 **Goal:** Train our first real ML models to establish a performance benchmark.
-* [ ] **4.1 Train/Test Split (`train_baselines.py`):** Split the data chronologically (e.g., train on fights before 2023, test on 2023-2024).
-  * *Learning concept:* "Temporal splitting". In time-series or sports data, you must test on the future, not random samples from the past, to mimic real-world deployment.
-* [ ] **4.2 Train Logistic Regression (`train_baselines.py`):** Train a simple linear classifier.
-  * *Learning concept:* Logistic Regression acts as a baseline. It draws a straight line (decision boundary) through data and predicts probabilities. 
-* [ ] **4.3 Train Baseline Random Forest (`train_baselines.py`):** Train an ensemble of decision trees.
-  * *Learning concept:* Random Forests can learn non-linear patterns (e.g., "age matters more for flyweights than heavyweights") by having many decision trees vote on the outcome.
+* [x] **4.1 Train/Test Split (`train_baselines.py`):** Split the data chronologically (train on pre-2023 fights, test on 2023+).
+* [x] **4.2 Train Logistic Regression (`train_baselines.py`):** Train a simple linear classifier (Baseline Accuracy: 66.38%).
+* [x] **4.3 Train Baseline Random Forest (`train_baselines.py`):** Train an ensemble of decision trees (Baseline Accuracy: 68.57%).
+> **💡 What you learned:** Temporal (chronological) splitting is critical for sports datasets to avoid look-ahead bias. Baselines give you a baseline metric to beat.
 
 ---
 
-## ⏳ Phase 5: Advanced Modeling (Boosting)
+## ✅ Phase 5: Advanced Modeling (Boosting) (Completed)
 **Goal:** Train production-grade, state-of-the-art tabular ML models.
-* [ ] **5.1 Train XGBoost Model (`train_model.py`):** Implement the XGBoost algorithm.
-  * *Learning concept:* "Gradient Boosting". Unlike Random Forest which builds trees independently, XGBoost builds trees sequentially—each new tree tries to fix the mistakes of the previous tree.
-* [ ] **5.2 Hyperparameter Tuning (`train_model.py`):** Use Grid Search or Random Search to find the best model parameters.
-  * *Learning concept:* Finding the sweet spot between "underfitting" (model is too simple) and "overfitting" (model memorizes the training data but fails on new data).
+* [x] **5.1 Train XGBoost Model (`train_xgboost.py`):** Implement the XGBoost algorithm.
+* [x] **5.2 Hyperparameter Tuning (`train_xgboost.py`):** Use Grid Search to find the best model parameters (Final Accuracy: 68.02%).
+> **💡 What you learned:** Grid Search automatically tests recipes of parameters. XGBoost sequentially trains trees to fix errors. Tuning defensively prevents overfitting on chaotic data.
 
 ---
 
-## ⏳ Phase 6: Model Evaluation & Explainability
+## ✅ Phase 6: Model Evaluation & Explainability (Completed)
 **Goal:** Grade the model and understand *why* it makes its predictions.
-* [ ] **6.1 Advanced Metrics (`evaluate.py`):** Calculate Accuracy, Precision, Recall, ROC-AUC, and Log-Loss.
-  * *Learning concept:* Accuracy isn't everything. ROC-AUC measures how well the model ranks winners, and Log-Loss measures how confident and trustworthy the predicted probabilities are.
-* [ ] **6.2 Explainability with SHAP (`evaluate.py` / notebooks):** Generate feature importance charts and SHAP values for specific fights.
-  * *Learning concept:* Breaking the "black box." SHAP explains exactly how much each feature (like a reach advantage) pushed the final probability up or down for a specific prediction.
+* [x] **6.1 Advanced Metrics (`evaluate.py` / notebooks):** Calculated Accuracy, Precision, Recall, ROC-AUC, and Confusion Matrix. Discovered the 72% precision "Underdog Signal".
+* [x] **6.2 Explainability with SHAP (`evaluate.py` / notebooks):** Generated feature importance charts and SHAP values to explain predictions.
 
 ---
 
-## ⏳ Phases 7-9: Deployment & Visualization (Future)
-*Once the core ML engine is built, we will break down the simulation engine (Monte Carlo), the FastAPI backend, and the Streamlit frontend dashboard into trackable tasks here.*
+## ✅ Phase 7: Simulation Engine (Completed)
+**Goal:** Build a Monte Carlo simulator to run fights 10,000 times based on model probabilities.
+* [x] **7.1 Fighter Profiles (`simulator.py`):** Parsed historical stats from `ufc-cleaned.csv` to build fighter data objects.
+* [x] **7.2 Monte Carlo Physics (`simulator.py`):** Built random number generation to simulate finishes (KOs/Submissions) vs Decisions.
+* [x] **7.3 Performance Optimization:** Engineered the simulator to run 10,000 runs in RAM under 100ms.
+> **💡 What you learned:** Probabilities aren't destinies. A 60% win chance means out of 10,000 simulated fights, the fighter wins 6,000 times. Simulating this helps visualize the variance and risk.
+
+---
+
+## ⏳ Phase 8: Web Application (Up Next)
+**Goal:** Build the frontend and backend to interact with the model.
+* [ ] **8.1 Backend API (FastAPI):** Create API endpoints to serve fighter data and run simulations on demand.
+* [ ] **8.2 Frontend UI (React/Tailwind):** Build the "Vegas Sportsbook" style dashboard to display predictions and simulations.
+
+---
+
+## 🚀 Phase 9: Future Enhancements (MLOps & Tuning)
+**Goal:** Take the project to a production-grade level (Planned for later).
+* [ ] **9.1 Advanced Tuning & Features:** ELO ratings and extensive hyperparameter tuning.
+* [ ] **9.2 CI/CD & Automation:** Automated data scraping and model retraining on weekly schedules.
 
 ---
 
