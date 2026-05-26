@@ -1,0 +1,71 @@
+name: Automated UFC Model Retraining
+
+on:
+  schedule:
+    # Runs every Sunday at 08:00 UTC (after Saturday night fights)
+    - cron: '0 8 * * 0'
+  workflow_dispatch:
+    # Allows manual triggering from the GitHub Actions tab
+
+jobs:
+  retrain-model:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          # Fetch full history so we can commit back to the repo
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install kaggle
+
+      - name: Download Latest Dataset from Kaggle
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          # The Kaggle CLI requires the credentials to be in ~/.kaggle/kaggle.json
+          # but setting KAGGLE_USERNAME and KAGGLE_KEY environment variables works too!
+          echo "Downloading latest ufc-master.csv..."
+          kaggle datasets download mdabbert/ultimate-ufc-dataset -f ufc-master.csv -p data/raw/original/ --unzip --force
+          echo "Dataset downloaded successfully!"
+
+      - name: Retrain XGBoost Model
+        run: |
+          # Set python path so modules in src/ resolve correctly
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          echo "Training the model on the latest data..."
+          python src/models/train_xgboost.py
+          echo "Training complete!"
+
+      - name: Commit and Push Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Stage the updated files
+          git add data/raw/original/ufc-master.csv
+          git add models/xgboost_model.pkl
+          git add mlflow.db || true  # Ignore if mlflow.db doesn't exist
+          
+          # Check if there are any changes to commit
+          if git diff --staged --quiet; then
+            echo "No new data or model changes to commit."
+            exit 0
+          fi
+          
+          git commit -m "Auto-Update: Retrained model with latest UFC data [skip ci]"
+          git push
