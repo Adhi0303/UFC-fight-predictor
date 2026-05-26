@@ -7,6 +7,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, log_loss
 from src.utils.logger import setup_logger
 import os
+import joblib
 
 logger = setup_logger()
 
@@ -113,7 +114,10 @@ def train_xgboost():
         # Save feature importances to a local CSV so MLflow can track the file
         os.makedirs("data/processed", exist_ok=True)
         feature_importance_df.to_csv("data/processed/xgb_feature_importances.csv", index=False)
-        # mlflow.log_artifact("data/processed/xgb_feature_importances.csv") # Removed to prevent artifact URI errors
+        
+        # Save the best model to disk
+        os.makedirs("models", exist_ok=True)
+        joblib.dump(best_model, "models/xgboost_model.pkl")
         
         logger.info("Logged XGBoost tuning results and feature importances to MLflow!")
 
