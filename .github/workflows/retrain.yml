@@ -57,6 +57,10 @@ jobs:
         run: |
           # Set python path so modules in src/ resolve correctly
           export PYTHONPATH=$PYTHONPATH:$(pwd)
+          
+          echo "Processing features from raw data..."
+          python src/data/save_processed_data.py
+          
           echo "Training the model on the latest data..."
           python src/models/train_xgboost.py
           echo "Training complete!"
@@ -68,8 +72,9 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Stage the updated files
-          git add data/raw/original/ufc-master.csv
+          # Stage the updated files (using -f to force add them if they are in .gitignore)
+          git add -f data/raw/original/ufc-master.csv
+          git add -f data/processed/ufc-ml-features.csv || true
           git add models/xgboost_model.pkl
           git add mlflow.db || true  # Ignore if mlflow.db doesn't exist
           
