@@ -5,10 +5,12 @@ import RosterPage from './components/RosterPage'
 import AnalysisScreen from './components/AnalysisScreen'
 import FighterProfile from './components/FighterProfile'
 import UpcomingCard from './components/UpcomingCard'
+import StartupScreen from './components/StartupScreen'
 
 function App() {
   const [fighters, setFighters] = useState([])
   const [loading, setLoading] = useState(false)
+  const [showStartup, setShowStartup] = useState(true)
   const [prediction, setPrediction] = useState(null)
   const [currentPage, setCurrentPage] = useState('fight-center')
   const [selectedFighter, setSelectedFighter] = useState(null)
@@ -121,10 +123,16 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
-      <main className="flex-1 w-full">
-        {renderPage()}
-      </main>
+      {showStartup && <StartupScreen onComplete={() => setShowStartup(false)} />}
+      
+      {!showStartup && (
+        <>
+          <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
+          <main className={`flex-1 w-full ${currentPage !== 'fight-center' ? 'pt-16' : ''}`}>
+            {renderPage()}
+          </main>
+        </>
+      )}
     </div>
   )
 }
