@@ -32,11 +32,10 @@ jobs:
 
       - name: Download Latest Dataset from Kaggle
         env:
-          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
-          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+          KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
         run: |
-          # The Kaggle CLI requires the credentials to be in ~/.kaggle/kaggle.json
-          # but setting KAGGLE_USERNAME and KAGGLE_KEY environment variables works too!
+          # Setting the KAGGLE_API_TOKEN environment variable allows the Kaggle CLI
+          # to authenticate automatically without needing a config file.
           echo "Downloading latest ufc-master.csv..."
           kaggle datasets download mdabbert/ultimate-ufc-dataset -f ufc-master.csv -p data/raw/original/ --unzip --force
           echo "Dataset downloaded successfully!"
