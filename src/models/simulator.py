@@ -150,7 +150,10 @@ def run_monte_carlo(fighter_A: str, fighter_B: str, p_A: float, num_sims: int = 
     Runs the Monte Carlo simulation 10,000 times and prints the breakdown.
     """
     # Load clean dataset
-    df = pd.read_csv("data/processed/ufc-cleaned.csv")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
+    data_path = os.path.join(project_root, "data", "processed", "ufc-cleaned.csv")
+    df = pd.read_csv(data_path)
     
     profile_A = FighterProfile(fighter_A, df)
     profile_B = FighterProfile(fighter_B, df)
@@ -164,7 +167,9 @@ def run_monte_carlo(fighter_A: str, fighter_B: str, p_A: float, num_sims: int = 
         "A_wins": 0, "B_wins": 0,
         "A_KO": 0, "A_Sub": 0, "A_Dec": 0,
         "B_KO": 0, "B_Sub": 0, "B_Dec": 0,
-        "total_rounds": 0
+        "total_rounds": 0,
+        "A_finishes_by_round": {1:0, 2:0, 3:0, 4:0, 5:0},
+        "B_finishes_by_round": {1:0, 2:0, 3:0, 4:0, 5:0}
     }
     
     for _ in range(num_sims):
@@ -175,16 +180,20 @@ def run_monte_carlo(fighter_A: str, fighter_B: str, p_A: float, num_sims: int = 
             results["A_wins"] += 1
             if method == "KO/TKO":
                 results["A_KO"] += 1
+                results["A_finishes_by_round"][r] = results["A_finishes_by_round"].get(r, 0) + 1
             elif method == "Submission":
                 results["A_Sub"] += 1
+                results["A_finishes_by_round"][r] = results["A_finishes_by_round"].get(r, 0) + 1
             else:
                 results["A_Dec"] += 1
         else:
             results["B_wins"] += 1
             if method == "KO/TKO":
                 results["B_KO"] += 1
+                results["B_finishes_by_round"][r] = results["B_finishes_by_round"].get(r, 0) + 1
             elif method == "Submission":
                 results["B_Sub"] += 1
+                results["B_finishes_by_round"][r] = results["B_finishes_by_round"].get(r, 0) + 1
             else:
                 results["B_Dec"] += 1
                 
@@ -208,8 +217,51 @@ def run_monte_carlo(fighter_A: str, fighter_B: str, p_A: float, num_sims: int = 
     
     print(f"\nAverage Rounds Fought: {avg_rounds:.2f} Rounds")
     print("="*40)
+    
+    return {
+        "R_fighter": fighter_A,
+        "B_fighter": fighter_B,
+        "p_Red": p_win_A,
+        "p_Blue": p_win_B,
+        "simulation": {
+            "R_KO": results["A_KO"] / num_sims,
+            "R_Sub": results["A_Sub"] / num_sims,
+            "R_Dec": results["A_Dec"] / num_sims,
+            "B_KO": results["B_KO"] / num_sims,
+            "B_Sub": results["B_Sub"] / num_sims,
+            "B_Dec": results["B_Dec"] / num_sims,
+            "avg_rounds": avg_rounds,
+            "R_finishes_by_round": {k: v/num_sims for k,v in results["A_finishes_by_round"].items() if k <= rounds},
+            "B_finishes_by_round": {k: v/num_sims for k,v in results["B_finishes_by_round"].items() if k <= rounds}
+        },
+        "stats": {
+            "R": {
+                "name": profile_A.name,
+                "wins": profile_A.total_wins,
+                "losses": profile_A.total_losses,
+                "ko_wins": profile_A.ko_wins,
+                "sub_wins": profile_A.sub_wins,
+                "dec_wins": profile_A.dec_wins,
+                "slpm": profile_A.slpm,
+                "td_rate": profile_A.td_rate,
+                "reach": profile_A.sig_str_pct # using this for now as reach isn't strictly parsed
+            },
+            "B": {
+                "name": profile_B.name,
+                "wins": profile_B.total_wins,
+                "losses": profile_B.total_losses,
+                "ko_wins": profile_B.ko_wins,
+                "sub_wins": profile_B.sub_wins,
+                "dec_wins": profile_B.dec_wins,
+                "slpm": profile_B.slpm,
+                "td_rate": profile_B.td_rate,
+                "reach": profile_B.sig_str_pct
+            }
+        }
+    }
 
 if __name__ == "__main__":
     # Test simulation for Conor McGregor vs Max Holloway
     # We will assume a prior win probability of 52% for Conor (A)
-    run_monte_carlo("Conor McGregor", "Max Holloway", p_A=0.52, rounds=3)
+    res = run_monte_carlo("Conor McGregor", "Max Holloway", p_A=0.52, rounds=3)
+    print(res)

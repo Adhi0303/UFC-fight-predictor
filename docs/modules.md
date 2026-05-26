@@ -88,7 +88,8 @@ For each step, we highlight **what you are learning** and **what code is being w
 ## 🚀 Phase 9: Future Enhancements (MLOps & Tuning)
 **Goal:** Take the project to a production-grade level (Planned for later).
 * [ ] **9.1 Advanced Tuning & Features:** ELO ratings and extensive hyperparameter tuning.
-* [ ] **9.2 CI/CD & Automation:** Automated data scraping and model retraining on weekly schedules.
+* [ ] **9.2 Dynamic Bout Weight Classes:** Allow selecting a target weight class and apply mathematical buffs/penalties for fighters moving up or down a class.
+* [ ] **9.3 CI/CD & Automation:** Automated data scraping and model retraining on weekly schedules.
 
 ---
 
