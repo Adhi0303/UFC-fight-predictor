@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Search, ChevronDown } from 'lucide-react'
+import FighterRadarChart from './FighterRadarChart'
 
 const WEIGHT_CLASSES = [
   'All Classes', 'Flyweight', 'Bantamweight', 'Featherweight', 'Lightweight',
@@ -88,7 +89,7 @@ function PosterBgImage({ name, imageUrl, isRed }) {
   )
 }
 
-export default function FightCenter({ fighters, onPredict, loading }) {
+export default function FightCenter({ fighters, onPredict, loading, prefill, onPrefillConsumed }) {
   const [rFighter, setRFighter] = useState('')
   const [bFighter, setBFighter] = useState('')
   const [rSearch, setRSearch] = useState('')
@@ -102,6 +103,89 @@ export default function FightCenter({ fighters, onPredict, loading }) {
   const [bWeightFilter, setBWeightFilter] = useState('All Classes')
   const [boutWeightClass, setBoutWeightClass] = useState('Welterweight')
   const [boutWCOpen, setBoutWCOpen] = useState(false)
+  const [fetchingOdds, setFetchingOdds] = useState(false)
+  const [oddsStatus, setOddsStatus] = useState(null)
+  const [prefillRef, setPrefillRef] = useState(null)
+  const [rProfile, setRProfile] = useState(null)
+  const [bProfile, setBProfile] = useState(null)
+
+  // Fetch profiles for radar chart when fighters change
+  useEffect(() => {
+    if (rFighter) {
+      fetch(`http://localhost:8000/api/fighters/${encodeURIComponent(rFighter)}/profile`)
+        .then(res => res.json())
+        .then(data => setRProfile(data))
+        .catch(console.error)
+    } else {
+      setRProfile(null)
+    }
+  }, [rFighter])
+
+  useEffect(() => {
+    if (bFighter) {
+      fetch(`http://localhost:8000/api/fighters/${encodeURIComponent(bFighter)}/profile`)
+        .then(res => res.json())
+        .then(data => setBProfile(data))
+        .catch(console.error)
+    } else {
+      setBProfile(null)
+    }
+  }, [bFighter])
+
+  // Consume prefill data from Upcoming Card
+  useEffect(() => {
+    if (prefill && prefill !== prefillRef) {
+      setRFighter(prefill.rFighter)
+      setRSearch(prefill.rFighter)
+      setBFighter(prefill.bFighter)
+      setBSearch(prefill.bFighter)
+      setROdds(prefill.rOdds)
+      setBOdds(prefill.bOdds)
+      if (prefill.weightClass) {
+        setBoutWeightClass(prefill.weightClass)
+      }
+      if (prefill.rounds) {
+        setRounds(prefill.rounds)
+      }
+      setOddsStatus(`Live odds pre-loaded from Upcoming Card`)
+      setPrefillRef(prefill)
+      if (onPrefillConsumed) onPrefillConsumed()
+    }
+  }, [prefill])
+
+  useEffect(() => {
+    if (rFighter && bFighter) {
+      // Don't re-fetch if odds were just pre-loaded from Upcoming Card
+      if (prefillRef && prefill === prefillRef) return
+
+      const fetchOdds = async () => {
+        setFetchingOdds(true)
+        setOddsStatus(null)
+        try {
+          const res = await fetch(`http://localhost:8000/api/odds?fighter_a=${encodeURIComponent(rFighter)}&fighter_b=${encodeURIComponent(bFighter)}`)
+          const data = await res.json()
+          
+          if (data.status === 'success') {
+            setROdds(data.r_odds)
+            setBOdds(data.b_odds)
+            setOddsStatus(`Live odds from ${data.bookmaker}`)
+          } else if (data.status === 'key_missing') {
+            setOddsStatus('API key missing. Using default -110.')
+          } else {
+            setOddsStatus('Matchup not found in live odds. Using default -110.')
+          }
+        } catch (err) {
+          console.error("Failed to fetch odds:", err)
+          setOddsStatus('Failed to fetch live odds.')
+        } finally {
+          setFetchingOdds(false)
+        }
+      }
+      fetchOdds()
+    } else {
+      setOddsStatus(null)
+    }
+  }, [rFighter, bFighter])
 
   const filterFighters = (query, weightClass) => {
     if (!fighters) return []
@@ -187,10 +271,18 @@ export default function FightCenter({ fighters, onPredict, loading }) {
             </div>
 
           </div>
+        </div>
+      </section>
 
-          {/* Bout Configuration */}
-          <div className="flex flex-wrap items-center justify-center gap-4 bg-surfaceDark px-6 py-4 border border-borderDark relative z-40">
-            <div className="flex items-center gap-3">
+      {/* ─── RADAR CHART ANALYSIS ─── */}
+      {rFighter && bFighter && rProfile && bProfile && (
+        <FighterRadarChart rProfile={rProfile} bProfile={bProfile} />
+      )}
+
+      {/* ─── BOUT CONFIGURATION ─── */}
+      <section className="max-w-6xl mx-auto px-6 mt-8 relative z-40">
+        <div className="flex flex-wrap items-center justify-center gap-4 bg-surfaceDark px-6 py-4 border border-borderDark relative">
+          <div className="flex items-center gap-3">
               <span className="text-xs text-textInverseMuted uppercase tracking-widest font-bold">Class</span>
               
               {/* Custom Dropdown for Bout Weight Class */}
@@ -243,8 +335,6 @@ export default function FightCenter({ fighters, onPredict, loading }) {
               </div>
             </div>
           </div>
-
-        </div>
       </section>
 
       {/* ─── MATCHUP CONFIGURATION ─── */}
@@ -298,14 +388,17 @@ export default function FightCenter({ fighters, onPredict, loading }) {
                 )}
               </div>
 
-              <div>
-                <label className="text-[10px] text-textSecondary uppercase tracking-widest font-bold block mb-1">Vegas Odds</label>
-                <input
-                  type="number"
+              <div className="flex-1">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-[10px] text-textSecondary uppercase tracking-widest font-bold">Vegas Odds</label>
+                  {fetchingOdds && <span className="text-[10px] text-zinc-400 animate-pulse">Fetching live...</span>}
+                </div>
+                <input type="number" 
+                  className="w-full bg-background border border-borderDark focus:border-redCorner outline-none rounded p-2 text-textPrimary font-mono text-center"
                   value={rOdds}
                   onChange={(e) => setROdds(e.target.value)}
-                  className="w-full bg-white border border-border px-4 py-3 text-sm font-bold text-textPrimary outline-none focus:border-redCorner transition-colors"
                 />
+                {oddsStatus && <p className="text-[9px] text-zinc-500 mt-1">{oddsStatus}</p>}
               </div>
             </div>
           </div>
@@ -357,14 +450,17 @@ export default function FightCenter({ fighters, onPredict, loading }) {
                 )}
               </div>
 
-              <div>
-                <label className="text-[10px] text-textSecondary uppercase tracking-widest font-bold block mb-1">Vegas Odds</label>
-                <input
-                  type="number"
+              <div className="flex-1">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-[10px] text-textSecondary uppercase tracking-widest font-bold">Vegas Odds</label>
+                  {fetchingOdds && <span className="text-[10px] text-zinc-400 animate-pulse">Fetching live...</span>}
+                </div>
+                <input type="number" 
+                  className="w-full bg-background border border-borderDark focus:border-blueCorner outline-none rounded p-2 text-textPrimary font-mono text-center"
                   value={bOdds}
                   onChange={(e) => setBOdds(e.target.value)}
-                  className="w-full bg-white border border-border px-4 py-3 text-sm font-bold text-textPrimary outline-none focus:border-blueCorner transition-colors"
                 />
+                {oddsStatus && <p className="text-[9px] text-zinc-500 mt-1 text-right">{oddsStatus}</p>}
               </div>
             </div>
           </div>

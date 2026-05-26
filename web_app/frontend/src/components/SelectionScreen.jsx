@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Search, Swords, User } from 'lucide-react'
 
 const WEIGHT_CLASSES = ['All', 'Flyweight', 'Bantamweight', 'Featherweight', 'Lightweight', 'Welterweight', 'Middleweight', 'Light Heavyweight', 'Heavyweight', "Women's Strawweight", "Women's Flyweight", "Women's Bantamweight"]
@@ -65,7 +65,39 @@ export default function SelectionScreen({ fighters, onPredict, loading }) {
   const [bFighter, setBFighter] = useState(null)
   const [rOdds, setROdds] = useState(-110)
   const [bOdds, setBOdds] = useState(-110)
+  const [fetchingOdds, setFetchingOdds] = useState(false)
+  const [oddsStatus, setOddsStatus] = useState(null)
 
+  useEffect(() => {
+    if (rFighter && bFighter) {
+      const fetchOdds = async () => {
+        setFetchingOdds(true)
+        setOddsStatus(null)
+        try {
+          const res = await fetch(`http://localhost:8000/api/odds?fighter_a=${encodeURIComponent(rFighter)}&fighter_b=${encodeURIComponent(bFighter)}`)
+          const data = await res.json()
+          
+          if (data.status === 'success') {
+            setROdds(data.r_odds)
+            setBOdds(data.b_odds)
+            setOddsStatus(`Live odds from ${data.bookmaker}`)
+          } else if (data.status === 'key_missing') {
+            setOddsStatus('API key missing. Using default -110.')
+          } else {
+            setOddsStatus('Matchup not found in live odds. Using default -110.')
+          }
+        } catch (err) {
+          console.error("Failed to fetch odds:", err)
+          setOddsStatus('Failed to fetch live odds.')
+        } finally {
+          setFetchingOdds(false)
+        }
+      }
+      fetchOdds()
+    } else {
+      setOddsStatus(null)
+    }
+  }, [rFighter, bFighter])
   const filteredRoster = useMemo(() => {
     if (!fighters) return []
     return fighters.filter(f => {
@@ -147,8 +179,11 @@ export default function SelectionScreen({ fighters, onPredict, loading }) {
       {/* Matchup Footer */}
       <div className="glass-panel p-4 flex flex-col md:flex-row items-center justify-between gap-6 border-t-2 border-gold/30">
         <div className="flex items-center gap-4 flex-1 w-full">
-          <div className="flex-1">
-            <label className="text-[10px] text-redCorner uppercase tracking-widest font-bold block mb-1">Red Corner Odds</label>
+          <div className="flex-1 text-center">
+            <div className="flex justify-center items-center gap-2 mb-1">
+              <label className="text-[10px] text-redCorner uppercase tracking-widest font-bold">Red Corner Odds</label>
+              {fetchingOdds && <span className="text-[10px] text-zinc-400 animate-pulse">Fetching...</span>}
+            </div>
             <input type="number" value={rOdds} onChange={e=>setROdds(e.target.value)} className="w-24 bg-background/50 border border-redCorner/30 rounded p-1 text-sm text-center" />
           </div>
           <div className="flex-1 text-right md:text-left">
@@ -174,15 +209,18 @@ export default function SelectionScreen({ fighters, onPredict, loading }) {
           <span className="relative z-10">{loading ? 'Simulating...' : 'Fight!'}</span>
         </button>
 
-        <div className="flex items-center justify-end gap-4 flex-1 w-full text-right">
+        <div className="flex items-center gap-4 flex-1 w-full">
           <div className="flex-1 text-left md:text-right">
             <div className="text-sm font-heading text-textSecondary uppercase">Blue Corner</div>
             <div className={`text-xl font-bold font-heading uppercase ${bFighter ? 'text-blueCorner shadow-neon-blue drop-shadow-[0_0_10px_rgba(59,130,246,0.8)]' : 'text-textSecondary/30'}`}>
               {bFighter || 'SELECT P2'}
             </div>
           </div>
-          <div className="flex-1 text-right">
-            <label className="text-[10px] text-blueCorner uppercase tracking-widest font-bold block mb-1">Blue Corner Odds</label>
+          <div className="flex-1 text-center">
+            <div className="flex justify-center items-center gap-2 mb-1">
+              <label className="text-[10px] text-blueCorner uppercase tracking-widest font-bold">Blue Corner Odds</label>
+              {fetchingOdds && <span className="text-[10px] text-zinc-400 animate-pulse">Fetching...</span>}
+            </div>
             <input type="number" value={bOdds} onChange={e=>setBOdds(e.target.value)} className="w-24 bg-background/50 border border-blueCorner/30 rounded p-1 text-sm text-center" />
           </div>
         </div>

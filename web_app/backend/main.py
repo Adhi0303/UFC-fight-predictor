@@ -7,6 +7,14 @@ import numpy as np
 import sys
 import os
 import math
+import httpx
+import asyncio
+from datetime import datetime
+from thefuzz import process
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Add the project root to sys.path so we can import from src
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, project_root)
@@ -380,6 +388,275 @@ def _safe_int(val, default=0):
         return int(v)
     except (TypeError, ValueError):
         return default
- 
+        
+# ─── ODDS API ────────────────────────────────────────────────
+@app.get("/api/odds")
+async def get_live_odds(fighter_a: str, fighter_b: str):
+    api_key = os.environ.get("ODDS_API_KEY")
+    if not api_key or api_key == "your_key_here":
+        return {"r_odds": -110, "b_odds": -110, "status": "key_missing"}
 
+    url = f"https://api.the-odds-api.com/v4/sports/mma_mixed_martial_arts/odds/?apiKey={api_key}&regions=us&markets=h2h&oddsFormat=american"
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, timeout=10.0)
+            if response.status_code != 200:
+                return {"r_odds": -110, "b_odds": -110, "status": f"api_error_{response.status_code}"}
+            
+            data = response.json()
+        except Exception as e:
+            return {"r_odds": -110, "b_odds": -110, "status": "request_failed"}
+
+    # Look through the upcoming events
+    for event in data:
+        # Event title is usually "Fighter A vs Fighter B" or similar
+        # We check if both our requested fighters match well with the event participants
+        home_team = event.get("home_team", "")
+        away_team = event.get("away_team", "")
+        
+        teams = [home_team, away_team]
+        
+        # Fuzzy match fighter A against the two teams
+        match_a, score_a = process.extractOne(fighter_a, teams)
+        # Fuzzy match fighter B against the two teams
+        match_b, score_b = process.extractOne(fighter_b, teams)
+        
+        if score_a > 80 and score_b > 80 and match_a != match_b:
+            # We found the fight! Now get the odds
+            bookmakers = event.get("bookmakers", [])
+            if not bookmakers:
+                continue
+                
+            # Grab DraftKings or just the first available bookmaker
+            bookmaker = next((b for b in bookmakers if b["key"] == "draftkings"), bookmakers[0])
+            markets = bookmaker.get("markets", [])
+            if not markets:
+                continue
+                
+            outcomes = markets[0].get("outcomes", [])
+            if len(outcomes) < 2:
+                continue
+                
+            # Match the outcomes to our requested fighters
+            outcome_a = next((o for o in outcomes if o["name"] == match_a), outcomes[0])
+            outcome_b = next((o for o in outcomes if o["name"] == match_b), outcomes[1])
+            
+            return {
+                "r_odds": outcome_a["price"],
+                "b_odds": outcome_b["price"],
+                "status": "success",
+                "bookmaker": bookmaker["title"]
+            }
+
+    # Fight not found
+    return {"r_odds": -110, "b_odds": -110, "status": "not_found"}
+
+async def _fetch_espn_data():
+    url = "https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard"
+    current_year = datetime.now().year
+    
+    espn_bouts = []
+    async with httpx.AsyncClient() as client:
+        try:
+            responses = await asyncio.gather(
+                client.get(f"{url}?limit=100&dates={current_year}", timeout=10.0),
+                client.get(f"{url}?limit=100&dates={current_year + 1}", timeout=10.0)
+            )
+            for res in responses:
+                if res.status_code == 200:
+                    data = res.json()
+                    for event in data.get("events", []):
+                        event_name = event.get("name", "UFC Event")
+                        for comp in event.get("competitions", []):
+                            competitors = comp.get("competitors", [])
+                            if len(competitors) == 2:
+                                f_a = competitors[0].get("athlete", {}).get("displayName", "")
+                                f_b = competitors[1].get("athlete", {}).get("displayName", "")
+                                rounds = comp.get("format", {}).get("regulation", {}).get("periods", 3)
+                                espn_bouts.append({
+                                    "event_name": event_name,
+                                    "fighter_a": f_a,
+                                    "fighter_b": f_b,
+                                    "rounds": rounds
+                                })
+        except Exception:
+            pass
+            
+    return espn_bouts
+
+
+# ─── UPCOMING CARD ───────────────────────────────────────────
+def _detect_weight_class(fighter_a_name, fighter_b_name):
+    """Detect the most likely weight class for a matchup from our roster data."""
+    roster_lookup = {f["name"]: f.get("weight_classes", []) for f in roster_data}
+    wc_a = roster_lookup.get(fighter_a_name, [])
+    wc_b = roster_lookup.get(fighter_b_name, [])
+
+    if wc_a and wc_b:
+        # Find shared weight classes
+        shared = [wc for wc in wc_a if wc in wc_b]
+        if shared:
+            return shared[0]
+        # No overlap — use the most recent (last) weight class of fighter A
+        return wc_a[-1]
+    elif wc_a:
+        return wc_a[-1]
+    elif wc_b:
+        return wc_b[-1]
+    return ""
+
+
+def _build_matchups(card_events, roster_names, espn_bouts):
+    """Build matchup dicts from a list of API events."""
+    matchups = []
+    for i, event in enumerate(card_events):
+        fighter_a_raw = event.get("home_team", "")
+        fighter_b_raw = event.get("away_team", "")
+
+        is_title = "title" in fighter_a_raw.lower() or "title" in fighter_b_raw.lower()
+        rounds = 5 if (i == 0 or is_title) else 3
+
+        # Override with ESPN data if a match is found
+        is_official = False
+        for eb in espn_bouts:
+            a_match = process.extractOne(fighter_a_raw, [eb["fighter_a"], eb["fighter_b"]])
+            b_match = process.extractOne(fighter_b_raw, [eb["fighter_a"], eb["fighter_b"]])
+            if a_match and b_match and a_match[1] > 75 and b_match[1] > 75:
+                if a_match[0] != b_match[0]:
+                    rounds = eb["rounds"]
+                    is_official = True
+                    break
+
+        # Only include fights that are officially scheduled on ESPN
+        if not is_official:
+            continue
+
+        if not fighter_a_raw or not fighter_b_raw:
+            continue
+
+        # Fuzzy-match against our roster
+        fighter_a_name = fighter_a_raw
+        fighter_b_name = fighter_b_raw
+        fighter_a_image = ""
+        fighter_b_image = ""
+        fighter_a_in_db = False
+        fighter_b_in_db = False
+
+        if roster_names:
+            match_a = process.extractOne(fighter_a_raw, roster_names)
+            if match_a and match_a[1] > 80:
+                fighter_a_name = match_a[0]
+                fighter_a_image = image_mapping.get(match_a[0], "")
+                fighter_a_in_db = True
+
+            match_b = process.extractOne(fighter_b_raw, roster_names)
+            if match_b and match_b[1] > 80:
+                fighter_b_name = match_b[0]
+                fighter_b_image = image_mapping.get(match_b[0], "")
+                fighter_b_in_db = True
+
+        # Extract odds from DraftKings or first available
+        fighter_a_odds = -110
+        fighter_b_odds = -110
+        bookmaker_name = ""
+        bookmakers = event.get("bookmakers", [])
+        if bookmakers:
+            bk = next((b for b in bookmakers if b["key"] == "draftkings"), bookmakers[0])
+            bookmaker_name = bk.get("title", "")
+            markets = bk.get("markets", [])
+            if markets:
+                outcomes = markets[0].get("outcomes", [])
+                if len(outcomes) >= 2:
+                    teams = [fighter_a_raw, fighter_b_raw]
+                    for outcome in outcomes:
+                        om = process.extractOne(outcome["name"], teams)
+                        if om and om[1] > 80:
+                            if om[0] == fighter_a_raw:
+                                fighter_a_odds = outcome["price"]
+                            else:
+                                fighter_b_odds = outcome["price"]
+
+        # Detect weight class
+        weight_class = _detect_weight_class(fighter_a_name, fighter_b_name)
+
+        matchups.append({
+            "fighter_a": fighter_a_name,
+            "fighter_b": fighter_b_name,
+            "fighter_a_image": fighter_a_image,
+            "fighter_b_image": fighter_b_image,
+            "fighter_a_odds": fighter_a_odds,
+            "fighter_b_odds": fighter_b_odds,
+            "fighter_a_in_db": fighter_a_in_db,
+            "fighter_b_in_db": fighter_b_in_db,
+            "commence_time": event.get("commence_time", ""),
+            "bookmaker": bookmaker_name,
+            "weight_class": weight_class,
+            "rounds": rounds,
+        })
+
+    return matchups
+
+
+@app.get("/api/upcoming-card")
+async def get_upcoming_card():
+    api_key = os.environ.get("ODDS_API_KEY")
+    if not api_key or api_key == "your_key_here":
+        return {"events": [], "status": "key_missing"}
+
+    url = (
+        f"https://api.the-odds-api.com/v4/sports/mma_mixed_martial_arts/odds/"
+        f"?apiKey={api_key}&regions=us&markets=h2h&oddsFormat=american"
+    )
+
+    espn_bouts = []
+    async with httpx.AsyncClient() as client:
+        try:
+            odds_task = client.get(url, timeout=15.0)
+            espn_task = _fetch_espn_data()
+            
+            response, espn_bouts = await asyncio.gather(odds_task, espn_task)
+            if response.status_code != 200:
+                return {"events": [], "status": f"api_error_{response.status_code}"}
+            data = response.json()
+        except Exception:
+            return {"events": [], "status": "request_failed"}
+
+    if not data:
+        return {"events": [], "status": "no_events"}
+
+    # Build a lookup of our roster names for fuzzy matching
+    roster_names = [f["name"] for f in roster_data] if roster_data else []
+
+    # Group events by date (YYYY-MM-DD of commence_time)
+    from collections import defaultdict
+    date_groups = defaultdict(list)
+    for event in data:
+        commence = event.get("commence_time", "")
+        day = commence[:10] if commence else "unknown"
+        date_groups[day].append(event)
+
+    # Build all event cards, sorted by date ascending
+    sorted_dates = sorted(date_groups.keys())
+    all_events = []
+
+    for event_date in sorted_dates:
+        card_events = date_groups[event_date]
+        # Sort by commence_time descending so main events (later in the night) come first
+        card_events.sort(key=lambda e: e.get("commence_time", ""), reverse=True)
+
+        event_name = card_events[0].get("sport_title", "UFC") if card_events else "UFC"
+        matchups = _build_matchups(card_events, roster_names, espn_bouts)
+
+        if matchups:
+            all_events.append({
+                "event_name": event_name,
+                "event_date": event_date,
+                "matchups": matchups,
+            })
+
+    return {
+        "events": all_events,
+        "status": "success",
+    }
 

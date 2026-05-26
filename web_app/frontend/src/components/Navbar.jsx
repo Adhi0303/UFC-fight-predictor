@@ -5,6 +5,7 @@ export default function Navbar({ currentPage, onNavigate }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navItems = [
+    { id: 'upcoming-card', label: 'Upcoming Card' },
     { id: 'fight-center', label: 'Fight Center' },
     { id: 'roster', label: 'Roster' },
     { id: 'analysis', label: 'Analysis' },

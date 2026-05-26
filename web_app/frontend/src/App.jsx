@@ -4,6 +4,7 @@ import FightCenter from './components/FightCenter'
 import RosterPage from './components/RosterPage'
 import AnalysisScreen from './components/AnalysisScreen'
 import FighterProfile from './components/FighterProfile'
+import UpcomingCard from './components/UpcomingCard'
 
 function App() {
   const [fighters, setFighters] = useState([])
@@ -11,6 +12,9 @@ function App() {
   const [prediction, setPrediction] = useState(null)
   const [currentPage, setCurrentPage] = useState('fight-center')
   const [selectedFighter, setSelectedFighter] = useState(null)
+
+  // Pre-fill state from Upcoming Card → Fight Center
+  const [prefill, setPrefill] = useState(null)
 
   useEffect(() => {
     fetch('http://localhost:8000/api/fighters')
@@ -58,6 +62,12 @@ function App() {
     setCurrentPage('fighter-profile')
   }
 
+  // Called when user clicks "Simulate" on an upcoming card matchup
+  const handleSimulateFromCard = (fighterA, fighterB, oddsA, oddsB, weightClass, rounds) => {
+    setPrefill({ rFighter: fighterA, bFighter: fighterB, rOdds: oddsA, bOdds: oddsB, weightClass: weightClass || '', rounds: rounds || 3 })
+    setCurrentPage('fight-center')
+  }
+
   const renderPage = () => {
     // If loading prediction, show a full screen or prominent loading state
     if (loading) {
@@ -75,8 +85,18 @@ function App() {
     }
 
     switch (currentPage) {
+      case 'upcoming-card':
+        return <UpcomingCard onSimulate={handleSimulateFromCard} />
       case 'fight-center':
-        return <FightCenter fighters={fighters} onPredict={handlePredict} loading={loading} />
+        return (
+          <FightCenter
+            fighters={fighters}
+            onPredict={handlePredict}
+            loading={loading}
+            prefill={prefill}
+            onPrefillConsumed={() => setPrefill(null)}
+          />
+        )
       case 'roster':
         return <RosterPage fighters={fighters} onViewProfile={handleViewProfile} />
       case 'analysis':
