@@ -20,6 +20,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 sys.path.insert(0, project_root)
 
 from src.models.simulator import run_monte_carlo, FighterProfile
+from src.models.xgboost_predictor import predict_win_probability
 
 app = FastAPI(title="Octagon AI — UFC Fight Predictor API")
 
@@ -346,10 +347,40 @@ def predict_fight(req: PredictRequest):
     if df.empty:
         raise HTTPException(status_code=500, detail="Data not loaded")
 
+    # --- Step 1: Get XGBoost model prediction ---
+    xgb_result = predict_win_probability(
+        r_name=req.R_fighter,
+        b_name=req.B_fighter,
+        df=df,
+        r_odds=req.R_odds,
+        b_odds=req.B_odds,
+        rounds=req.rounds,
+        weight_class=req.bout_weight_class
+    )
+    p_xgb = xgb_result.get("p_Red")  # Probability Red wins from XGBoost
+
+    # --- Step 2: Get odds-implied probability ---
     r_implied = odds_to_prob(req.R_odds)
     b_implied = odds_to_prob(req.B_odds)
     total = r_implied + b_implied
-    p_A = r_implied / total if total != 0 else 0.5
+    p_odds = r_implied / total if total != 0 else 0.5
+
+    # --- Step 3: Blend the two signals ---
+    # If XGBoost model is available, blend 60% model + 40% odds
+    # If model unavailable, fall back to 100% odds
+    if p_xgb is not None:
+        XGBOOST_WEIGHT = 0.6
+        ODDS_WEIGHT = 0.4
+        p_A = (p_xgb * XGBOOST_WEIGHT) + (p_odds * ODDS_WEIGHT)
+        prediction_source = "blended"
+        print(f"\n🧠 PREDICTION PIPELINE:")
+        print(f"   XGBoost Model:  {req.R_fighter} {p_xgb*100:.1f}% | {req.B_fighter} {(1-p_xgb)*100:.1f}%")
+        print(f"   Betting Odds:   {req.R_fighter} {p_odds*100:.1f}% | {req.B_fighter} {(1-p_odds)*100:.1f}%")
+        print(f"   Blended (60/40): {req.R_fighter} {p_A*100:.1f}% | {req.B_fighter} {(1-p_A)*100:.1f}%")
+    else:
+        p_A = p_odds
+        prediction_source = "odds_only"
+        print(f"\n⚠️  XGBoost model unavailable. Using odds-only: {req.R_fighter} {p_A*100:.1f}%")
 
     try:
         results = run_monte_carlo(
@@ -358,7 +389,11 @@ def predict_fight(req: PredictRequest):
             p_A=p_A,
             rounds=req.rounds
         )
-        # Attach bout weight class to results if provided
+        # Attach metadata to results
+        results["prediction_source"] = prediction_source
+        if p_xgb is not None:
+            results["xgboost_p_Red"] = round(p_xgb, 4)
+            results["odds_p_Red"] = round(p_odds, 4)
         if req.bout_weight_class:
             results["bout_weight_class"] = req.bout_weight_class
         return results

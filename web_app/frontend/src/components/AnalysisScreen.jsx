@@ -157,7 +157,10 @@ export default function AnalysisScreen({ prediction, onBack }) {
           </div>
 
           <p className="text-textInverseMuted text-center max-w-xl text-sm font-bold leading-relaxed mb-4">
-            Based on 10,000 Monte Carlo simulations analyzing striking volume, grappling dominance, and historical finish rates.
+            {p.prediction_source === 'blended' 
+              ? 'Powered by XGBoost ML model blended with live betting odds, validated through 10,000 Monte Carlo fight simulations.'
+              : 'Based on 10,000 Monte Carlo simulations analyzing striking volume, grappling dominance, and historical finish rates.'
+            }
           </p>
 
           {/* Probability Bar */}
@@ -220,9 +223,12 @@ export default function AnalysisScreen({ prediction, onBack }) {
 
           {/* Explanatory Note */}
           <div className="col-span-1 lg:col-span-2 bg-surfaceDark text-white p-6 border-l-4 border-ufcRed">
-            <h4 className="font-heading font-bold uppercase tracking-widest text-xs text-ufcRed mb-2">Simulation Engine Details</h4>
+            <h4 className="font-heading font-bold uppercase tracking-widest text-xs text-ufcRed mb-2">Prediction Engine Details</h4>
             <p className="text-textInverseMuted text-sm leading-relaxed">
-              The Monte Carlo engine generates outcomes by iterating through thousands of simulated rounds. It samples strike connections and takedown attempts from each fighter's historical distributions. The model applies a Poisson process for evaluating KO and Submission probability on a minute-by-minute basis, terminating the bout early if a critical threshold is met.
+              {p.prediction_source === 'blended'
+                ? `This prediction uses a hybrid AI pipeline. First, a trained XGBoost classifier analyzes 128 statistical features (striking volume, grappling accuracy, win streaks, physical attributes, rankings, and historical odds) to generate an independent win probability. This is then blended (60% ML / 40% market odds) to form the final prior, which feeds into 10,000 Monte Carlo fight simulations that model round-by-round KO, Submission, and Decision outcomes.`
+                : 'The Monte Carlo engine generates outcomes by iterating through thousands of simulated rounds. It samples strike connections and takedown attempts from each fighter\'s historical distributions, then applies finish probability scaling to model KO and Submission outcomes on a round-by-round basis.'
+              }
             </p>
           </div>
 

@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Search, ChevronDown } from 'lucide-react'
 import FighterRadarChart from './FighterRadarChart'
+import HeroVideo from './HeroVideo'
 
 const WEIGHT_CLASSES = [
   'All Classes', 'Flyweight', 'Bantamweight', 'Featherweight', 'Lightweight',
@@ -108,6 +109,7 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
   const [prefillRef, setPrefillRef] = useState(null)
   const [rProfile, setRProfile] = useState(null)
   const [bProfile, setBProfile] = useState(null)
+  const vsSectionRef = useRef(null)
 
   // Fetch profiles for radar chart when fighters change
   useEffect(() => {
@@ -215,11 +217,25 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
   const rFighterObj = useMemo(() => fighters?.find(f => f.name === rFighter), [fighters, rFighter])
   const bFighterObj = useMemo(() => fighters?.find(f => f.name === bFighter), [fighters, bFighter])
 
+  const scrollToVS = () => {
+    vsSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+  
+  // Custom wrapper to ensure prediction works
+  const handleLetsFight = () => {
+    if (rFighter && bFighter) {
+      onPredict(rFighter, bFighter, rOdds, bOdds, rounds, boutWeightClass)
+    }
+  }
+
   return (
     <div className="w-full bg-background min-h-screen pb-16">
       
+      {/* ─── HERO CINEMATIC VIDEO ─── */}
+      <HeroVideo onScrollDown={scrollToVS} />
+
       {/* ─── VS HERO (UFC STYLE) ─── */}
-      <section className="bg-ufcBlack border-b-8 border-ufcRed text-white pt-12 pb-16">
+      <section ref={vsSectionRef} className="bg-ufcBlack border-b-8 border-ufcRed text-white pt-12 pb-16">
         <div className="max-w-6xl mx-auto px-6 flex flex-col items-center">
           
           {/* Header */}
@@ -241,7 +257,7 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
                   <span className="text-[12px] font-heading font-black text-redCorner uppercase tracking-[0.3em] mb-2 drop-shadow-md">
                     Red Corner
                   </span>
-                  <h2 className="text-5xl md:text-7xl font-heading font-black uppercase tracking-tighter text-white leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] break-words w-full">
+                  <h2 className="text-4xl sm:text-5xl md:text-7xl font-heading font-black uppercase tracking-tighter text-white leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] break-words w-full">
                     {rLastName || 'FIGHTER 1'}
                   </h2>
                 </div>
@@ -255,7 +271,7 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
                   <span className="text-[12px] font-heading font-black text-blueCorner uppercase tracking-[0.3em] mb-2 drop-shadow-md">
                     Blue Corner
                   </span>
-                  <h2 className="text-5xl md:text-7xl font-heading font-black uppercase tracking-tighter text-white leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] break-words w-full">
+                  <h2 className="text-4xl sm:text-5xl md:text-7xl font-heading font-black uppercase tracking-tighter text-white leading-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] break-words w-full">
                     {bLastName || 'FIGHTER 2'}
                   </h2>
                 </div>
@@ -270,6 +286,21 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
               </div>
             </div>
 
+          </div>
+
+          {/* Let's Fight Button (Positioned below the fighters) */}
+          <div className="h-20 flex items-center justify-center -mt-4 mb-10 z-30">
+            {rFighter && bFighter && (
+              <button
+                onClick={handleLetsFight}
+                disabled={loading}
+                className="bg-ufcRed text-white border-2 border-ufcRed px-8 py-3 md:px-12 md:py-4 font-heading font-black text-xl md:text-2xl uppercase tracking-widest skew-x-[-12deg] transition-all duration-300 hover:scale-110 hover:bg-black shadow-[0_0_40px_rgba(210,32,48,0.6)] active:scale-95"
+              >
+                <span className="block skew-x-[12deg]">
+                  {loading ? 'Processing...' : "Let's Fight"}
+                </span>
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -465,34 +496,22 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
             </div>
           </div>
           
-          {/* Predict Button */}
+          {/* Stage Fight Button (Scrolls up) */}
           <div className="col-span-1 md:col-span-2 pt-4">
             <button
-              onClick={handleFight}
+              onClick={scrollToVS}
               disabled={!rFighter || !bFighter || loading}
               className={`w-full py-5 font-heading font-black text-xl uppercase tracking-widest transition-all duration-500 transform relative overflow-hidden group
                 ${!rFighter || !bFighter || loading
                   ? 'bg-background text-textMuted border border-border cursor-not-allowed'
-                  : 'bg-ufcRed text-white hover:bg-black hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40 active:scale-[0.98]'
+                  : 'bg-ufcBlack text-white hover:bg-black hover:scale-[1.02] border border-borderDark hover:border-ufcRed hover:shadow-2xl active:scale-[0.98]'
                 }
               `}
             >
-              {/* Animated shine effect on hover */}
-              {!loading && rFighter && bFighter && (
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-              )}
-              
               <div className="relative h-8 w-full overflow-hidden flex items-center justify-center">
-                {/* Normal Text */}
-                <span className="absolute inset-0 flex items-center justify-center transition-all duration-300 transform translate-y-0 opacity-100 group-hover:-translate-y-8 group-hover:opacity-0">
-                  {loading ? 'Processing...' : 'Run Simulation'}
+                <span className="absolute inset-0 flex items-center justify-center">
+                  Stage Fight
                 </span>
-                {/* Hover Text */}
-                {!loading && rFighter && bFighter && (
-                  <span className="absolute inset-0 flex items-center justify-center transition-all duration-300 transform translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
-                    Let's Fight
-                  </span>
-                )}
               </div>
             </button>
           </div>

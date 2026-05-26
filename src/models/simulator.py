@@ -97,25 +97,37 @@ def simulate_fight(profile_A: FighterProfile, profile_B: FighterProfile, p_A: fl
     losses_B = max(1, profile_B.total_losses)
     
     # Offensive threat
-    threat_A_KO = (profile_A.slpm / 5.0) * (profile_A.ko_wins / wins_A) * 0.10
-    threat_B_KO = (profile_B.slpm / 5.0) * (profile_B.ko_wins / wins_B) * 0.10
+    threat_A_KO = min((profile_A.slpm / 5.0) * (profile_A.ko_wins / wins_A) * 0.08, 0.25)
+    threat_B_KO = min((profile_B.slpm / 5.0) * (profile_B.ko_wins / wins_B) * 0.08, 0.25)
     
-    threat_A_Sub = ((profile_A.td_rate + getattr(profile_A, 'sub_att', 0.5)) / 3.0) * (profile_A.sub_wins / wins_A) * 0.10
-    threat_B_Sub = ((profile_B.td_rate + getattr(profile_B, 'sub_att', 0.5)) / 3.0) * (profile_B.sub_wins / wins_B) * 0.10
+    threat_A_Sub = min(((profile_A.td_rate + getattr(profile_A, 'sub_att', 0.5)) / 3.0) * (profile_A.sub_wins / wins_A) * 0.08, 0.25)
+    threat_B_Sub = min(((profile_B.td_rate + getattr(profile_B, 'sub_att', 0.5)) / 3.0) * (profile_B.sub_wins / wins_B) * 0.08, 0.25)
     
     # Defensive vulnerability (Durability)
-    vuln_A_KO = 0.8 + (profile_A.ko_losses / max(5, profile_A.total_fights))
-    vuln_B_KO = 0.8 + (profile_B.ko_losses / max(5, profile_B.total_fights))
+    vuln_A_KO = 0.6 + (profile_A.ko_losses / max(5, profile_A.total_fights))
+    vuln_B_KO = 0.6 + (profile_B.ko_losses / max(5, profile_B.total_fights))
     
-    vuln_A_Sub = 0.8 + (profile_A.sub_losses / max(5, profile_A.total_fights))
-    vuln_B_Sub = 0.8 + (profile_B.sub_losses / max(5, profile_B.total_fights))
+    vuln_A_Sub = 0.6 + (profile_A.sub_losses / max(5, profile_A.total_fights))
+    vuln_B_Sub = 0.6 + (profile_B.sub_losses / max(5, profile_B.total_fights))
     
-    # Combined probabilities
-    prob_KO_A = threat_A_KO * vuln_B_KO
-    prob_KO_B = threat_B_KO * vuln_A_KO
+    # Base combined probabilities
+    base_prob_KO_A = threat_A_KO * vuln_B_KO
+    base_prob_KO_B = threat_B_KO * vuln_A_KO
     
-    prob_Sub_A = threat_A_Sub * vuln_B_Sub
-    prob_Sub_B = threat_B_Sub * vuln_A_Sub
+    base_prob_Sub_A = threat_A_Sub * vuln_B_Sub
+    base_prob_Sub_B = threat_B_Sub * vuln_A_Sub
+    
+    # 2. Scale finish probabilities based on the XGBoost prediction (p_A)
+    # This prevents logical contradictions where the fighter predicted to lose (e.g. 30% chance)
+    # is somehow given a higher KO chance every round. The winning fighter dictates the fight!
+    scale_A = p_A / 0.5
+    scale_B = (1.0 - p_A) / 0.5
+    
+    prob_KO_A = min(base_prob_KO_A * scale_A, 0.4)
+    prob_Sub_A = min(base_prob_Sub_A * scale_A, 0.4)
+    
+    prob_KO_B = min(base_prob_KO_B * scale_B, 0.4)
+    prob_Sub_B = min(base_prob_Sub_B * scale_B, 0.4)
 
     # Round scoring calibration (using prior probability p_A)
     # If the fight goes to a decision, the probability of A winning a round is p_A
