@@ -380,3 +380,4 @@ def _safe_int(val, default=0):
         return int(v)
     except (TypeError, ValueError):
         return default
+ 

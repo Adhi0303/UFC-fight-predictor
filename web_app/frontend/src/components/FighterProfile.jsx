@@ -75,10 +75,10 @@ function CircularProgress({ percent, title, children }) {
   const strokeDashoffset = circumference - (percent / 100) * circumference;
 
   return (
-    <div className="bg-zinc-900/60 border border-zinc-800/80 p-6 flex flex-col md:flex-row items-center gap-8 text-white">
+    <div className="bg-white border border-zinc-200 p-6 flex flex-col md:flex-row items-center gap-8 text-black shadow-sm">
       <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
         <svg className="transform -rotate-90 w-32 h-32" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r={radius} stroke="#27272a" strokeWidth="16" fill="none" />
+          <circle cx="50" cy="50" r={radius} stroke="#e4e4e7" strokeWidth="16" fill="none" />
           <circle 
             cx="50" cy="50" r={radius} 
             stroke="#d22030" strokeWidth="16" fill="none" 
@@ -88,10 +88,10 @@ function CircularProgress({ percent, title, children }) {
             className="transition-all duration-1000 ease-out"
           />
         </svg>
-        <div className="absolute font-heading font-black text-3xl tracking-tighter text-white">{Math.round(percent)}%</div>
+        <div className="absolute font-heading font-black text-3xl tracking-tighter text-black">{Math.round(percent)}%</div>
       </div>
       <div className="flex-1 w-full text-center md:text-left">
-        <h4 className="font-heading font-black uppercase text-xl md:text-2xl tracking-tighter mb-4 text-white">{title}</h4>
+        <h4 className="font-heading font-black uppercase text-xl md:text-2xl tracking-tighter mb-4 text-black">{title}</h4>
         <div className="space-y-4">
           {children}
         </div>
@@ -102,9 +102,9 @@ function CircularProgress({ percent, title, children }) {
 
 function AccuracyStatRow({ label, value }) {
   return (
-    <div className="flex flex-col border-b border-zinc-800 last:border-0 pb-2 mb-2 last:pb-0 last:mb-0">
-      <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{label}</span>
-      <span className="text-white font-bold">{value}</span>
+    <div className="flex flex-col border-b border-zinc-200 last:border-0 pb-2 mb-2 last:pb-0 last:mb-0">
+      <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{label}</span>
+      <span className="text-black font-bold">{value}</span>
     </div>
   )
 }
@@ -112,9 +112,9 @@ function AccuracyStatRow({ label, value }) {
 function GridStat({ value, label, subtext }) {
   return (
     <div className="flex flex-col text-left">
-      <span className="font-heading font-black text-4xl tracking-tighter leading-none mb-1 text-white">{value}</span>
-      <span className="text-xs text-zinc-400 uppercase font-bold tracking-widest mb-1">{label}</span>
-      {subtext && <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">{subtext}</span>}
+      <span className="font-heading font-black text-4xl tracking-tighter leading-none mb-1 text-black">{value}</span>
+      <span className="text-xs text-zinc-500 uppercase font-bold tracking-widest mb-1">{label}</span>
+      {subtext && <span className="text-[9px] text-zinc-400 uppercase font-bold tracking-widest">{subtext}</span>}
     </div>
   )
 }
@@ -260,20 +260,20 @@ export default function FighterProfile({ fighterName, onBack, onViewFighter }) {
       </section>
 
       {/* ─── STATS & RECORDS SECTION ─── */}
-      <section className="bg-[#0b0b0c] py-16 border-y border-borderDark">
+      <section className="bg-zinc-100 py-16 border-y border-zinc-200">
         <div className="max-w-5xl mx-auto px-6">
           <h2 className="text-4xl font-heading font-black uppercase text-ufcRed tracking-tighter mb-6">Stats & Records</h2>
           
           {/* Top Banner */}
-          <div className="bg-zinc-900/60 border border-zinc-800/85 p-6 flex flex-col md:flex-row justify-between items-center mb-6 text-white">
+          <div className="bg-white border border-zinc-200 shadow-sm p-6 flex flex-col md:flex-row justify-between items-center mb-6 text-black">
             <div className="flex items-baseline gap-2 mb-4 md:mb-0">
-              <span className="font-heading font-black text-4xl tracking-tighter leading-none text-white">{wm.ko}</span>
-              <span className="text-zinc-400 text-sm font-bold uppercase tracking-widest">Wins by Knockout</span>
+              <span className="font-heading font-black text-4xl tracking-tighter leading-none text-black">{wm.ko}</span>
+              <span className="text-zinc-500 text-sm font-bold uppercase tracking-widest">Wins by Knockout</span>
             </div>
-            <div className="hidden md:block w-px h-10 bg-zinc-800"></div>
+            <div className="hidden md:block w-px h-10 bg-zinc-200"></div>
             <div className="flex items-baseline gap-2">
-              <span className="font-heading font-black text-4xl tracking-tighter leading-none text-white">{wm.sub}</span>
-              <span className="text-zinc-400 text-sm font-bold uppercase tracking-widest">Wins by Submission</span>
+              <span className="font-heading font-black text-4xl tracking-tighter leading-none text-black">{wm.sub}</span>
+              <span className="text-zinc-500 text-sm font-bold uppercase tracking-widest">Wins by Submission</span>
             </div>
           </div>
 
@@ -292,13 +292,13 @@ export default function FighterProfile({ fighterName, onBack, onViewFighter }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Left Box */}
-            <div className="bg-zinc-900/60 border border-zinc-800/85 p-8 grid grid-cols-2 gap-8">
+            <div className="bg-white border border-zinc-200 shadow-sm p-8 grid grid-cols-2 gap-8">
               <GridStat value={p.striking.slpm.toFixed(2)} label="Sig. Str. Landed" subtext="Per Min" />
               <GridStat value={p.grappling.td_landed.toFixed(2)} label="Takedown Avg" subtext="Per 15 Min" />
             </div>
 
             {/* Right Box */}
-            <div className="bg-zinc-900/60 border border-zinc-800/85 p-8 grid grid-cols-2 gap-8">
+            <div className="bg-white border border-zinc-200 shadow-sm p-8 grid grid-cols-2 gap-8">
               <GridStat value={p.grappling.sub_att.toFixed(1)} label="Submission Avg" subtext="Per 15 Min" />
               <GridStat value={p.career.avg_fight_time || "0:00"} label="Average Fight Time" />
             </div>
@@ -307,8 +307,8 @@ export default function FighterProfile({ fighterName, onBack, onViewFighter }) {
 
           {/* Bottom Grid Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            <div className="md:col-span-1 bg-zinc-900/60 border border-zinc-800/85 p-6 flex flex-col h-full text-white">
-              <h4 className="font-heading font-black uppercase text-xl md:text-2xl tracking-tighter text-center mb-6 text-white">Win By Method</h4>
+            <div className="md:col-span-1 bg-white border border-zinc-200 shadow-sm p-6 flex flex-col h-full text-black">
+              <h4 className="font-heading font-black uppercase text-xl md:text-2xl tracking-tighter text-center mb-6 text-black">Win By Method</h4>
               <div className="flex-1 flex flex-col justify-center space-y-4">
                 <AccuracyStatRow label={`KO/TKO (${koPct}%)`} value={wm.ko} />
                 <AccuracyStatRow label={`DECISION (${decPct}%)`} value={decWins} />
@@ -316,41 +316,41 @@ export default function FighterProfile({ fighterName, onBack, onViewFighter }) {
               </div>
             </div>
 
-            <div className="md:col-span-2 bg-zinc-900/60 border border-zinc-800/85 p-6 flex flex-col h-full text-white">
-              <h4 className="font-heading font-black uppercase text-xl md:text-2xl tracking-tighter mb-6 text-center md:text-left text-white">Physical Attributes & Record</h4>
+            <div className="md:col-span-2 bg-white border border-zinc-200 shadow-sm p-6 flex flex-col h-full text-black">
+              <h4 className="font-heading font-black uppercase text-xl md:text-2xl tracking-tighter mb-6 text-center md:text-left text-black">Physical Attributes & Record</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-1 items-center">
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Height</span>
-                  <span className="font-heading font-black text-2xl tracking-tight text-white">{p.height_cm ? `${p.height_cm} cm` : '—'}</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Height</span>
+                  <span className="font-heading font-black text-2xl tracking-tight text-black">{p.height_cm ? `${p.height_cm} cm` : '—'}</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Reach</span>
-                  <span className="font-heading font-black text-2xl tracking-tight text-white">{p.reach_cm ? `${p.reach_cm} cm` : '—'}</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Reach</span>
+                  <span className="font-heading font-black text-2xl tracking-tight text-black">{p.reach_cm ? `${p.reach_cm} cm` : '—'}</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Stance</span>
-                  <span className="font-heading font-black text-2xl tracking-tight text-white">{p.stance || '—'}</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Stance</span>
+                  <span className="font-heading font-black text-2xl tracking-tight text-black">{p.stance || '—'}</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Age</span>
-                  <span className="font-heading font-black text-2xl tracking-tight text-white">{p.age || '—'}</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Age</span>
+                  <span className="font-heading font-black text-2xl tracking-tight text-black">{p.age || '—'}</span>
                 </div>
                 
                 <div className="flex flex-col mt-4 md:mt-0">
-                  <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Win Streak</span>
-                  <span className="font-heading font-black text-2xl tracking-tight text-white">{p.streaks?.current_win || 0}</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Win Streak</span>
+                  <span className="font-heading font-black text-2xl tracking-tight text-black">{p.streaks?.current_win || 0}</span>
                 </div>
                 <div className="flex flex-col mt-4 md:mt-0">
-                  <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Longest Streak</span>
-                  <span className="font-heading font-black text-2xl tracking-tight text-white">{p.streaks?.longest_win || 0}</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Longest Streak</span>
+                  <span className="font-heading font-black text-2xl tracking-tight text-black">{p.streaks?.longest_win || 0}</span>
                 </div>
                 <div className="flex flex-col mt-4 md:mt-0">
-                  <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Total Rounds</span>
-                  <span className="font-heading font-black text-2xl tracking-tight text-white">{p.career?.total_rounds || 0}</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Total Rounds</span>
+                  <span className="font-heading font-black text-2xl tracking-tight text-black">{p.career?.total_rounds || 0}</span>
                 </div>
                 <div className="flex flex-col mt-4 md:mt-0">
-                  <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Title Bouts</span>
-                  <span className="font-heading font-black text-2xl tracking-tight text-white">{p.career?.title_bouts || 0}</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Title Bouts</span>
+                  <span className="font-heading font-black text-2xl tracking-tight text-black">{p.career?.title_bouts || 0}</span>
                 </div>
               </div>
             </div>
