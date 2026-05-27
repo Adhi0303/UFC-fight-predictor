@@ -107,6 +107,18 @@ export default function RosterPage({ fighters, onViewProfile }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [fighterStats, setFighterStats] = useState({})
 
+  const filteredRoster = useMemo(() => {
+    if (!fighters) return []
+    let list = fighters
+    if (activeWC !== 'All Classes') {
+      list = list.filter(f => f.weight_classes && f.weight_classes.includes(activeWC))
+    }
+    if (searchQuery) {
+      list = list.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    }
+    return list
+  }, [fighters, activeWC, searchQuery])
+
   // Fetch individual stats only for filtered fighters to display in cards
   useEffect(() => {
     if (!fighters || fighters.length === 0) return
@@ -125,18 +137,6 @@ export default function RosterPage({ fighters, onViewProfile }) {
       }
     }
     fetchStats()
-  }, [fighters, activeWC, searchQuery])
-
-  const filteredRoster = useMemo(() => {
-    if (!fighters) return []
-    let list = fighters
-    if (activeWC !== 'All Classes') {
-      list = list.filter(f => f.weight_classes && f.weight_classes.includes(activeWC))
-    }
-    if (searchQuery) {
-      list = list.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    }
-    return list
   }, [fighters, activeWC, searchQuery])
 
   return (

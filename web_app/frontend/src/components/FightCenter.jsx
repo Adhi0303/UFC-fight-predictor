@@ -189,6 +189,9 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
     }
   }, [rFighter, bFighter])
 
+  const rFighterObj = useMemo(() => fighters?.find(f => f.name === rFighter), [fighters, rFighter])
+  const bFighterObj = useMemo(() => fighters?.find(f => f.name === bFighter), [fighters, bFighter])
+
   // Auto-update the Bout Weight Class when manually selecting fighters
   useEffect(() => {
     // Don't auto-update if we just loaded from a prefill (Upcoming Card)
@@ -242,8 +245,6 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
   const rLastName = rFighter ? rFighter.split(' ').pop().toUpperCase() : ''
   const bLastName = bFighter ? bFighter.split(' ').pop().toUpperCase() : ''
 
-  const rFighterObj = useMemo(() => fighters?.find(f => f.name === rFighter), [fighters, rFighter])
-  const bFighterObj = useMemo(() => fighters?.find(f => f.name === bFighter), [fighters, bFighter])
 
   const scrollToVS = () => {
     vsSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
