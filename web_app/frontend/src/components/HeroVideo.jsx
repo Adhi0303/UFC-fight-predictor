@@ -79,19 +79,13 @@ const HeroVideo = ({ onScrollDown }) => {
 
       {/* Tap to Unmute Indicator */}
       <div 
-        className="absolute top-6 right-6 md:top-8 md:right-8 z-30 flex items-center gap-2 bg-black/40 hover:bg-black/70 px-4 py-2 rounded-full border border-white/20 transition-all backdrop-blur-md cursor-pointer"
+        className="absolute bottom-6 right-6 md:bottom-8 md:right-8 z-30 flex items-center justify-center bg-black/40 hover:bg-black/80 p-3 rounded-full border border-ufcRed/30 hover:border-ufcRed transition-all backdrop-blur-md cursor-pointer group"
         onClick={toggleMute}
       >
         {isMuted ? (
-          <>
-            <VolumeX className="w-4 h-4 text-white animate-pulse" />
-            <span className="text-white text-[10px] md:text-xs font-heading font-bold uppercase tracking-widest">Tap to Unmute</span>
-          </>
+          <VolumeX className="w-5 h-5 text-ufcRed animate-pulse" />
         ) : (
-          <>
-            <Volume2 className="w-4 h-4 text-white" />
-            <span className="text-white text-[10px] md:text-xs font-heading font-bold uppercase tracking-widest">Mute</span>
-          </>
+          <Volume2 className="w-5 h-5 text-ufcRed group-hover:scale-110 transition-transform" />
         )}
       </div>
 
