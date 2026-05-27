@@ -509,11 +509,13 @@ async def _fetch_espn_data():
                                 f_a = competitors[0].get("athlete", {}).get("displayName", "")
                                 f_b = competitors[1].get("athlete", {}).get("displayName", "")
                                 rounds = comp.get("format", {}).get("regulation", {}).get("periods", 3)
+                                weight_class_raw = comp.get("type", {}).get("abbreviation", "")
                                 espn_bouts.append({
                                     "event_name": event_name,
                                     "fighter_a": f_a,
                                     "fighter_b": f_b,
-                                    "rounds": rounds
+                                    "rounds": rounds,
+                                    "weight_class": weight_class_raw
                                 })
         except Exception:
             pass
@@ -554,12 +556,14 @@ def _build_matchups(card_events, roster_names, espn_bouts):
 
         # Override with ESPN data if a match is found
         is_official = False
+        espn_weight_class = ""
         for eb in espn_bouts:
             a_match = process.extractOne(fighter_a_raw, [eb["fighter_a"], eb["fighter_b"]])
             b_match = process.extractOne(fighter_b_raw, [eb["fighter_a"], eb["fighter_b"]])
             if a_match and b_match and a_match[1] > 75 and b_match[1] > 75:
                 if a_match[0] != b_match[0]:
                     rounds = eb["rounds"]
+                    espn_weight_class = eb.get("weight_class", "")
                     is_official = True
                     break
 
@@ -613,7 +617,11 @@ def _build_matchups(card_events, roster_names, espn_bouts):
                                 fighter_b_odds = outcome["price"]
 
         # Detect weight class
-        weight_class = _detect_weight_class(fighter_a_name, fighter_b_name)
+        weight_class = ""
+        if espn_weight_class:
+            weight_class = espn_weight_class.replace("W ", "Women's ") # Clean up ESPN abbreviation
+        else:
+            weight_class = _detect_weight_class(fighter_a_name, fighter_b_name)
 
         matchups.append({
             "fighter_a": fighter_a_name,
