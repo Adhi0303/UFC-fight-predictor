@@ -129,8 +129,8 @@ export default function FighterProfile({ fighterName, onBack, onViewFighter }) {
     setLoading(true)
 
     Promise.all([
-      fetch(`http://localhost:8000/api/fighters/${encodeURIComponent(fighterName)}/profile`).then(r => r.json()),
-      fetch(`http://localhost:8000/api/fighters/${encodeURIComponent(fighterName)}/history`).then(r => r.json())
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/fighters/${encodeURIComponent(fighterName)}/profile`).then(r => r.json()),
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/fighters/${encodeURIComponent(fighterName)}/history`).then(r => r.json())
     ]).then(([profileData, historyData]) => {
       setProfile(profileData)
       setHistory(historyData.fights || [])

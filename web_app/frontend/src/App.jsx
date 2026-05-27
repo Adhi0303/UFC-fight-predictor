@@ -19,7 +19,7 @@ function App() {
   const [prefill, setPrefill] = useState(null)
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/fighters')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/fighters`)
       .then(res => res.json())
       .then(data => setFighters(data.fighters))
       .catch(err => console.error(err))
@@ -33,7 +33,7 @@ function App() {
     const minDelay = new Promise(resolve => setTimeout(resolve, 3000))
 
     try {
-      const apiCall = fetch('http://localhost:8000/api/predict', {
+      const apiCall = fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

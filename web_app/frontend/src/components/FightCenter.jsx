@@ -114,7 +114,7 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
   // Fetch profiles for radar chart when fighters change
   useEffect(() => {
     if (rFighter) {
-      fetch(`http://localhost:8000/api/fighters/${encodeURIComponent(rFighter)}/profile`)
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/fighters/${encodeURIComponent(rFighter)}/profile`)
         .then(res => res.json())
         .then(data => setRProfile(data))
         .catch(console.error)
@@ -125,7 +125,7 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
 
   useEffect(() => {
     if (bFighter) {
-      fetch(`http://localhost:8000/api/fighters/${encodeURIComponent(bFighter)}/profile`)
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/fighters/${encodeURIComponent(bFighter)}/profile`)
         .then(res => res.json())
         .then(data => setBProfile(data))
         .catch(console.error)
@@ -164,7 +164,7 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
         setFetchingOdds(true)
         setOddsStatus(null)
         try {
-          const res = await fetch(`http://localhost:8000/api/odds?fighter_a=${encodeURIComponent(rFighter)}&fighter_b=${encodeURIComponent(bFighter)}`)
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/odds?fighter_a=${encodeURIComponent(rFighter)}&fighter_b=${encodeURIComponent(bFighter)}`)
           const data = await res.json()
           
           if (data.status === 'success') {

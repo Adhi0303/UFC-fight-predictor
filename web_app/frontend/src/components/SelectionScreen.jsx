@@ -74,7 +74,7 @@ export default function SelectionScreen({ fighters, onPredict, loading }) {
         setFetchingOdds(true)
         setOddsStatus(null)
         try {
-          const res = await fetch(`http://localhost:8000/api/odds?fighter_a=${encodeURIComponent(rFighter)}&fighter_b=${encodeURIComponent(bFighter)}`)
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/odds?fighter_a=${encodeURIComponent(rFighter)}&fighter_b=${encodeURIComponent(bFighter)}`)
           const data = await res.json()
           
           if (data.status === 'success') {

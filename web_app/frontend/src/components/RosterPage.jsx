@@ -115,7 +115,7 @@ export default function RosterPage({ fighters, onViewProfile }) {
       for (const f of topFighters) {
         if (!fighterStats[f.name]) {
           try {
-            const res = await fetch(`http://localhost:8000/api/fighters/${encodeURIComponent(f.name)}`)
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/fighters/${encodeURIComponent(f.name)}`)
             const data = await res.json()
             setFighterStats(prev => ({ ...prev, [f.name]: data }))
           } catch (e) {

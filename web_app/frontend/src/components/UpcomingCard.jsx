@@ -161,7 +161,7 @@ export default function UpcomingCard({ onSimulate }) {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch('http://localhost:8000/api/upcoming-card')
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/upcoming-card`)
         const data = await res.json()
 
         if (data.status === 'success' && data.events?.length > 0) {
