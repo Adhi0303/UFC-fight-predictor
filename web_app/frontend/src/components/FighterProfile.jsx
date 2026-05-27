@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { ChevronLeft, User, TrendingUp, TrendingDown, ArrowRight, Activity, Shield, Crosshair } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts'
 
 // Advanced Spider Chart Heatmap
@@ -22,7 +23,13 @@ function OctagonHeatmap({ metrics }) {
       <h3 className="font-heading font-black text-xl text-white uppercase tracking-widest mb-6">Combat Analysis</h3>
       
       <div className="w-full flex flex-col md:flex-row items-center justify-center gap-8 relative overflow-hidden transition-all duration-500">
-        <div className={`transition-all duration-500 ease-in-out h-80 w-full md:w-[60%] ${activeMetric ? 'transform md:-translate-x-[15%]' : ''}`}>
+        <motion.div 
+          className={`transition-all duration-500 ease-in-out h-80 w-full md:w-[60%] ${activeMetric ? 'transform md:-translate-x-[15%]' : ''}`}
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}
               onMouseMove={(state) => {
@@ -39,7 +46,7 @@ function OctagonHeatmap({ metrics }) {
               <Radar name="Fighter" dataKey="A" stroke="#d22030" strokeWidth={3} fill="#d22030" fillOpacity={0.5} className="animate-pulse cursor-pointer" isAnimationActive={true} animationDuration={1500} animationEasing="ease-out" />
             </RadarChart>
           </ResponsiveContainer>
-        </div>
+        </motion.div>
 
         {/* Info Panel that appears when hovered/clicked */}
         <div className={`transition-all duration-500 ease-in-out absolute bottom-0 md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:right-[8%] w-[90%] md:w-[32%] bg-ufcBlack/90 md:bg-transparent p-6 border border-ufcRed/50 md:border-none rounded-lg md:rounded-none z-10 ${activeMetric ? 'opacity-100 translate-x-0 pointer-events-auto' : 'opacity-0 translate-x-12 pointer-events-none'}`}>

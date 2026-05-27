@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { motion } from 'framer-motion';
 
 export default function FighterRadarChart({ rProfile, bProfile }) {
   const data = useMemo(() => {
@@ -94,43 +95,51 @@ export default function FighterRadarChart({ rProfile, bProfile }) {
         {/* Center Radar Chart */}
         <div className="w-full md:w-2/4 h-[350px] md:h-[450px]">
           <h2 className="text-center text-white font-heading font-black uppercase text-2xl tracking-tighter mb-2 md:hidden">Matchup Analysis</h2>
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data}>
-              <PolarGrid stroke="#333" strokeDasharray="3 3" />
-              <PolarAngleAxis 
-                dataKey="subject" 
-                tick={{ fill: '#FFFFFF', fontSize: 11, fontFamily: 'monospace', fontWeight: 'bold', textTransform: 'uppercase' }} 
-              />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Radar 
-                name={rProfile.name} 
-                dataKey="Red" 
-                stroke="#D22030" 
-                fill="#D22030" 
-                fillOpacity={0.5} 
-                isAnimationActive={true}
-                animationDuration={1500}
-                animationEasing="ease-out"
-                strokeWidth={3}
-              />
-              <Radar 
-                name={bProfile.name} 
-                dataKey="Blue" 
-                stroke="#0055A4" 
-                fill="#0055A4" 
-                fillOpacity={0.5} 
-                isAnimationActive={true}
-                animationDuration={1500}
-                animationEasing="ease-out"
-                strokeWidth={3}
-              />
-              <Legend 
-                wrapperStyle={{ fontFamily: 'monospace', fontSize: '11px', textTransform: 'uppercase', color: '#FFF' }}
-                iconType="circle"
-              />
-            </RadarChart>
-          </ResponsiveContainer>
+          <motion.div 
+            className="w-full h-full"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data}>
+                <PolarGrid stroke="#333" strokeDasharray="3 3" />
+                <PolarAngleAxis 
+                  dataKey="subject" 
+                  tick={{ fill: '#FFFFFF', fontSize: 11, fontFamily: 'monospace', fontWeight: 'bold', textTransform: 'uppercase' }} 
+                />
+                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Radar 
+                  name={rProfile.name} 
+                  dataKey="Red" 
+                  stroke="#D22030" 
+                  fill="#D22030" 
+                  fillOpacity={0.5} 
+                  isAnimationActive={true}
+                  animationDuration={1500}
+                  animationEasing="ease-out"
+                  strokeWidth={3}
+                />
+                <Radar 
+                  name={bProfile.name} 
+                  dataKey="Blue" 
+                  stroke="#0055A4" 
+                  fill="#0055A4" 
+                  fillOpacity={0.5} 
+                  isAnimationActive={true}
+                  animationDuration={1500}
+                  animationEasing="ease-out"
+                  strokeWidth={3}
+                />
+                <Legend 
+                  wrapperStyle={{ fontFamily: 'monospace', fontSize: '11px', textTransform: 'uppercase', color: '#FFF' }}
+                  iconType="circle"
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          </motion.div>
         </div>
 
         {/* Right Side Stats (Blue) */}

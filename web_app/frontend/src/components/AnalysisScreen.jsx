@@ -14,13 +14,15 @@ function MethodBar({ label, rPct, bPct }) {
         <motion.div 
           className="h-full bg-redCorner" 
           initial={{ width: 0 }}
-          animate={{ width: `${rPct}%` }}
+          whileInView={{ width: `${rPct}%` }}
+          viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 1, ease: "easeOut" }}
         />
         <motion.div 
           className="h-full bg-blueCorner" 
           initial={{ width: 0 }}
-          animate={{ width: `${bPct}%` }}
+          whileInView={{ width: `${bPct}%` }}
+          viewport={{ once: true, margin: "-20px" }}
           transition={{ duration: 1, ease: "easeOut" }}
         />
       </div>
@@ -52,7 +54,8 @@ function RoundByRoundChart({ rFinishes, bFinishes, rounds }) {
               <motion.div 
                 className="h-8 bg-redCorner flex items-center justify-end pr-2"
                 initial={{ width: 0 }}
-                animate={{ width: `${(rPct / maxPct) * 100}%` }}
+                whileInView={{ width: `${(rPct / maxPct) * 100}%` }}
+                viewport={{ once: true, margin: "-20px" }}
                 transition={{ duration: 1, delay: idx * 0.1, ease: "easeOut" }}
               >
                 {rPct > 0 && <span className="text-white text-xs font-bold">{rPct}%</span>}
@@ -63,7 +66,8 @@ function RoundByRoundChart({ rFinishes, bFinishes, rounds }) {
               <motion.div 
                 className="h-8 bg-blueCorner flex items-center justify-start pl-2"
                 initial={{ width: 0 }}
-                animate={{ width: `${(bPct / maxPct) * 100}%` }}
+                whileInView={{ width: `${(bPct / maxPct) * 100}%` }}
+                viewport={{ once: true, margin: "-20px" }}
                 transition={{ duration: 1, delay: idx * 0.1, ease: "easeOut" }}
               >
                 {bPct > 0 && <span className="text-white text-xs font-bold">{bPct}%</span>}
