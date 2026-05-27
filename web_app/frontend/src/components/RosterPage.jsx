@@ -40,7 +40,10 @@ function FighterCard({ fighter, stats, onViewProfile }) {
   };
 
   return (
-    <div className="bg-white border-2 border-transparent hover:border-ufcRed transition-all duration-300 hover:-translate-y-1 flex flex-col h-full shadow-sm overflow-hidden group">
+    <div 
+      onClick={() => onViewProfile(fighter.name)}
+      className="bg-white border-2 border-transparent hover:border-ufcRed transition-all duration-300 hover:-translate-y-1 flex flex-col h-full shadow-sm overflow-hidden group cursor-pointer"
+    >
       
       {/* Image area */}
       <div className="relative aspect-[4/3] bg-background overflow-hidden shrink-0">
@@ -67,16 +70,16 @@ function FighterCard({ fighter, stats, onViewProfile }) {
       </div>
 
       {/* Info */}
-      <div className="p-5 flex flex-col flex-1 border-t border-border">
-        <div className="mb-4">
-          <p className="text-[10px] text-ufcRed font-heading font-bold uppercase tracking-widest mb-1">{weightClass}</p>
-          <h3 className="font-heading font-black text-xl text-textPrimary uppercase tracking-tighter leading-tight truncate group-hover:text-ufcRed transition-colors">
+      <div className="p-3 md:p-5 flex flex-col flex-1 border-t border-border">
+        <div className="mb-3 md:mb-4">
+          <p className="text-[9px] md:text-[10px] text-ufcRed font-heading font-bold uppercase tracking-widest mb-1">{weightClass}</p>
+          <h3 className="font-heading font-black text-lg md:text-xl text-textPrimary uppercase tracking-tighter leading-tight truncate group-hover:text-ufcRed transition-colors">
             {fighter.name}
           </h3>
         </div>
 
         {/* Stats row */}
-        <div className="flex items-center justify-between border-t border-border pt-4 mt-auto">
+        <div className="flex items-center justify-between border-t border-border pt-3 mt-auto">
           <StatCell label="Record" value={stats ? `${stats.wins}-${stats.losses}` : '—'} />
           <div className="w-px h-8 bg-border" />
           <StatCell label="SLpM" value={stats ? stats.slpm.toFixed(1) : '—'} />
@@ -86,17 +89,6 @@ function FighterCard({ fighter, stats, onViewProfile }) {
             value={stats ? `${Math.round((stats.ko_wins / (stats.wins || 1)) * 100)}%` : '—'}
             highlight
           />
-        </div>
-
-        {/* View Profile Action */}
-        <div className="mt-4 pt-4 border-t border-border flex justify-center">
-          <button 
-            onClick={() => onViewProfile(fighter.name)}
-            className="w-full py-2 bg-background text-textPrimary text-xs font-heading font-bold uppercase tracking-widest hover:bg-ufcRed hover:text-white transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95 relative overflow-hidden group"
-          >
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-            <span className="relative z-10">View Profile</span>
-          </button>
         </div>
       </div>
     </div>
@@ -193,7 +185,7 @@ export default function RosterPage({ fighters, onViewProfile }) {
 
         {filteredRoster.length > 0 ? (
           <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6"
             layout
           >
             <AnimatePresence>

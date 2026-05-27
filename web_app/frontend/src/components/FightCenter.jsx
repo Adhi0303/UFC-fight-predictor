@@ -404,7 +404,7 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
       </section>
 
       {/* ─── MATCHUP CONFIGURATION ─── */}
-      <section className="max-w-5xl mx-auto px-6 -mt-8 relative z-10">
+      <section className="max-w-5xl mx-auto px-4 md:px-6 mt-6 md:-mt-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white border border-border shadow-xl p-6 md:p-10">
           
           {/* Red Corner Form */}

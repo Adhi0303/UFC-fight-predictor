@@ -86,13 +86,15 @@ function CircularProgress({ percent, title, children }) {
       <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
         <svg className="transform -rotate-90 w-32 h-32" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r={radius} stroke="#e4e4e7" strokeWidth="16" fill="none" />
-          <circle 
+          <motion.circle 
             cx="50" cy="50" r={radius} 
             stroke="#d22030" strokeWidth="16" fill="none" 
             strokeDasharray={circumference} 
-            strokeDashoffset={strokeDashoffset} 
+            initial={{ strokeDashoffset: circumference }}
+            whileInView={{ strokeDashoffset }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
             strokeLinecap="square"
-            className="transition-all duration-1000 ease-out"
           />
         </svg>
         <div className="absolute font-heading font-black text-3xl tracking-tighter text-black">{Math.round(percent)}%</div>
