@@ -189,6 +189,34 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
     }
   }, [rFighter, bFighter])
 
+  // Auto-update the Bout Weight Class when manually selecting fighters
+  useEffect(() => {
+    // Don't auto-update if we just loaded from a prefill (Upcoming Card)
+    if (prefillRef && prefill === prefillRef && prefill.weightClass) return
+
+    if (rFighterObj && bFighterObj) {
+      const rClasses = rFighterObj.weight_classes || []
+      const bClasses = bFighterObj.weight_classes || []
+      
+      // Try to find a shared weight class
+      const intersection = rClasses.find(c => bClasses.includes(c))
+      
+      if (intersection) {
+        setBoutWeightClass(intersection)
+      } else {
+        // If they don't share a weight class (e.g. Pereira moving up to fight Gane),
+        // default to the opponent's (Blue Corner) weight class
+        if (bClasses.length > 0) {
+          setBoutWeightClass(bClasses[0])
+        }
+      }
+    } else if (rFighterObj && rFighterObj.weight_classes?.length > 0) {
+      setBoutWeightClass(rFighterObj.weight_classes[0])
+    } else if (bFighterObj && bFighterObj.weight_classes?.length > 0) {
+      setBoutWeightClass(bFighterObj.weight_classes[0])
+    }
+  }, [rFighterObj, bFighterObj, prefill, prefillRef])
+
   const filterFighters = (query, weightClass) => {
     if (!fighters) return []
     let list = fighters
