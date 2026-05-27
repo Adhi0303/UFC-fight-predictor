@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Volume2, VolumeX } from 'lucide-react';
 
 const HeroVideo = ({ onScrollDown }) => {
   const videoRef = useRef(null);
@@ -33,13 +34,14 @@ const HeroVideo = ({ onScrollDown }) => {
       });
     }, options);
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    const currentContainer = containerRef.current;
+    if (currentContainer) {
+      observer.observe(currentContainer);
     }
 
     return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
+      if (currentContainer) {
+        observer.unobserve(currentContainer);
       }
     };
   }, [userInteracted]);
@@ -50,6 +52,15 @@ const HeroVideo = ({ onScrollDown }) => {
     if (videoRef.current) {
       videoRef.current.muted = false;
       setIsMuted(false);
+    }
+  };
+
+  const toggleMute = (e) => {
+    e.stopPropagation();
+    setUserInteracted(true);
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
     }
   };
 
@@ -65,6 +76,24 @@ const HeroVideo = ({ onScrollDown }) => {
         playsInline
         className="absolute top-0 left-0 w-full h-full object-cover"
       />
+
+      {/* Tap to Unmute Indicator */}
+      <div 
+        className="absolute top-6 right-6 md:top-8 md:right-8 z-30 flex items-center gap-2 bg-black/40 hover:bg-black/70 px-4 py-2 rounded-full border border-white/20 transition-all backdrop-blur-md cursor-pointer"
+        onClick={toggleMute}
+      >
+        {isMuted ? (
+          <>
+            <VolumeX className="w-4 h-4 text-white animate-pulse" />
+            <span className="text-white text-[10px] md:text-xs font-heading font-bold uppercase tracking-widest">Tap to Unmute</span>
+          </>
+        ) : (
+          <>
+            <Volume2 className="w-4 h-4 text-white" />
+            <span className="text-white text-[10px] md:text-xs font-heading font-bold uppercase tracking-widest">Mute</span>
+          </>
+        )}
+      </div>
 
       {/* Minimal Scroll Down Indicator */}
       <div 
