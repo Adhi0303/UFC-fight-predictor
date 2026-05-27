@@ -404,8 +404,8 @@ export default function FighterProfile({ fighterName, onBack, onViewFighter }) {
                     </div>
                   </div>
 
-                  {/* Result (New Column) */}
-                  <div className="hidden md:flex flex-col items-center justify-center w-24">
+                  {/* Result */}
+                  <div className="flex flex-col items-center justify-center w-full md:w-24 my-2 md:my-0">
                     <span className={`font-heading font-black text-3xl uppercase tracking-tighter ${fight.result === 'Win' ? 'text-green-600' : fight.result === 'Loss' ? 'text-ufcRed' : 'text-textMuted'}`}>
                       {fight.result}
                     </span>
