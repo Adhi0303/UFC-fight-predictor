@@ -152,6 +152,12 @@ export default function FightCenter({ fighters, onPredict, loading, prefill, onP
       setOddsStatus(`Live odds pre-loaded from Upcoming Card`)
       setPrefillRef(prefill)
       if (onPrefillConsumed) onPrefillConsumed()
+      
+      setTimeout(() => {
+        if (vsSectionRef.current) {
+          vsSectionRef.current.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 300)
     }
   }, [prefill])
 

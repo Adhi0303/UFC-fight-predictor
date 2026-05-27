@@ -1,4 +1,5 @@
 import { ChevronLeft, Zap, Target, Flame, TrendingUp, Clock } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 // Simple horizontal bar chart
 function MethodBar({ label, rPct, bPct }) {
@@ -10,8 +11,18 @@ function MethodBar({ label, rPct, bPct }) {
         <span className="text-blueCorner">{bPct}%</span>
       </div>
       <div className="h-3 w-full bg-background flex overflow-hidden border border-border">
-        <div className="h-full bg-redCorner transition-all duration-1000" style={{ width: `${rPct}%` }} />
-        <div className="h-full bg-blueCorner transition-all duration-1000" style={{ width: `${bPct}%` }} />
+        <motion.div 
+          className="h-full bg-redCorner" 
+          initial={{ width: 0 }}
+          animate={{ width: `${rPct}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        />
+        <motion.div 
+          className="h-full bg-blueCorner" 
+          initial={{ width: 0 }}
+          animate={{ width: `${bPct}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        />
       </div>
     </div>
   )
@@ -31,28 +42,32 @@ function RoundByRoundChart({ rFinishes, bFinishes, rounds }) {
   
   return (
     <div className="space-y-4">
-      {roundData.map(({ round, rPct, bPct }) => (
+      {roundData.map(({ round, rPct, bPct }, idx) => (
         <div key={round} className="flex items-center gap-3">
           <div className="text-xs font-bold text-textSecondary uppercase tracking-widest w-16">
             Round {round}
           </div>
           <div className="flex-1 flex items-center gap-2">
             <div className="flex-1 flex justify-end">
-              <div 
-                className="h-8 bg-redCorner transition-all duration-1000 flex items-center justify-end pr-2"
-                style={{ width: `${(rPct / maxPct) * 100}%` }}
+              <motion.div 
+                className="h-8 bg-redCorner flex items-center justify-end pr-2"
+                initial={{ width: 0 }}
+                animate={{ width: `${(rPct / maxPct) * 100}%` }}
+                transition={{ duration: 1, delay: idx * 0.1, ease: "easeOut" }}
               >
                 {rPct > 0 && <span className="text-white text-xs font-bold">{rPct}%</span>}
-              </div>
+              </motion.div>
             </div>
             <div className="w-px h-8 bg-border" />
             <div className="flex-1 flex justify-start">
-              <div 
-                className="h-8 bg-blueCorner transition-all duration-1000 flex items-center justify-start pl-2"
-                style={{ width: `${(bPct / maxPct) * 100}%` }}
+              <motion.div 
+                className="h-8 bg-blueCorner flex items-center justify-start pl-2"
+                initial={{ width: 0 }}
+                animate={{ width: `${(bPct / maxPct) * 100}%` }}
+                transition={{ duration: 1, delay: idx * 0.1, ease: "easeOut" }}
               >
                 {bPct > 0 && <span className="text-white text-xs font-bold">{bPct}%</span>}
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>

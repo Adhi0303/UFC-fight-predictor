@@ -108,7 +108,10 @@ export default function FighterRadarChart({ rProfile, bProfile }) {
                 dataKey="Red" 
                 stroke="#D22030" 
                 fill="#D22030" 
-                fillOpacity={0.4} 
+                fillOpacity={0.5} 
+                isAnimationActive={true}
+                animationDuration={1500}
+                animationEasing="ease-out"
                 strokeWidth={3}
               />
               <Radar 
@@ -116,7 +119,10 @@ export default function FighterRadarChart({ rProfile, bProfile }) {
                 dataKey="Blue" 
                 stroke="#0055A4" 
                 fill="#0055A4" 
-                fillOpacity={0.4} 
+                fillOpacity={0.5} 
+                isAnimationActive={true}
+                animationDuration={1500}
+                animationEasing="ease-out"
                 strokeWidth={3}
               />
               <Legend 

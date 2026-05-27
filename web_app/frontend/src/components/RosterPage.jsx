@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Search, Filter, User, ArrowRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const WEIGHT_CLASSES = [
   'All Classes', 'Flyweight', 'Bantamweight', 'Featherweight', 'Lightweight',
@@ -177,31 +178,44 @@ export default function RosterPage({ fighters, onViewProfile }) {
               <button
                 key={wc}
                 onClick={() => setActiveWC(wc)}
-                className={`px-4 py-2 text-xs font-heading font-bold uppercase tracking-widest transition-all duration-300 transform rounded-none ${
+                className={`relative overflow-hidden group px-4 py-2 text-xs font-heading font-bold uppercase tracking-widest transition-all duration-300 transform rounded-none border ${
                   activeWC === wc
-                    ? 'bg-ufcBlack text-white scale-105 shadow-lg'
-                    : 'bg-white text-textSecondary border border-border hover:border-ufcBlack hover:scale-105 hover:shadow-md'
+                    ? 'bg-ufcBlack text-white border-ufcBlack scale-105 shadow-lg'
+                    : 'bg-white text-textSecondary border-border hover:border-ufcRed hover:scale-105 hover:shadow-md hover:text-white'
                 }`}
               >
-                {wc === 'All Classes' ? 'All' : wc.replace('Women\'s ', 'W ')}
+                <div className={`absolute inset-0 bg-ufcRed transition-transform duration-300 ease-out origin-left z-0 ${activeWC === wc ? 'scale-x-0' : 'scale-x-0 group-hover:scale-x-100'}`} />
+                <span className="relative z-10 transition-colors duration-300">{wc === 'All Classes' ? 'All' : wc.replace('Women\'s ', 'W ')}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Fighter Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredRoster.map(f => (
-            <FighterCard
-              key={f.name}
-              fighter={f}
-              stats={fighterStats[f.name] || null}
-              onViewProfile={onViewProfile}
-            />
-          ))}
-        </div>
-
-        {filteredRoster.length === 0 && (
+        {filteredRoster.length > 0 ? (
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+            layout
+          >
+            <AnimatePresence>
+              {filteredRoster.slice(0, 100).map((fighter, idx) => (
+                <motion.div
+                  key={fighter.name}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4, delay: Math.min(idx * 0.05, 0.5) }}
+                >
+                  <FighterCard 
+                    fighter={fighter} 
+                    stats={fighterStats[fighter.name]}
+                    onViewProfile={onViewProfile}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        ) : (
           <div className="text-center py-20 text-textMuted font-heading font-bold uppercase tracking-widest">
             No athletes found matching criteria.
           </div>

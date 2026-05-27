@@ -36,7 +36,7 @@ function OctagonHeatmap({ metrics }) {
               <PolarGrid stroke="#374151" strokeWidth={2} />
               <PolarAngleAxis dataKey="subject" tick={{ fill: '#d1d5db', fontSize: 11, fontWeight: 'bold', fontFamily: 'Inter' }} />
               <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
-              <Radar name="Fighter" dataKey="A" stroke="#d22030" strokeWidth={3} fill="#d22030" fillOpacity={0.5} className="animate-pulse cursor-pointer" />
+              <Radar name="Fighter" dataKey="A" stroke="#d22030" strokeWidth={3} fill="#d22030" fillOpacity={0.5} className="animate-pulse cursor-pointer" isAnimationActive={true} animationDuration={1500} animationEasing="ease-out" />
             </RadarChart>
           </ResponsiveContainer>
         </div>
