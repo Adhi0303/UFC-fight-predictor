@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/UFC_Logo.svg/2560px-UFC_Logo.svg.png" width="200" alt="UFC Logo" />
+  <img src="docs/ufc_logo.png" width="200" alt="UFC Logo" />
   <h1>Ultimate UFC Fight Predictor</h1>
   <p><strong>A State-of-the-Art Machine Learning & Monte Carlo Simulation Engine for MMA</strong></p>
 </div>
