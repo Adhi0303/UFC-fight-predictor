@@ -22,8 +22,12 @@ def load_and_split_data(filepath: str = "data/processed/ufc-ml-features.csv"):
     df['date'] = pd.to_datetime(df['date'])
     
     # Chronological Split (No time-traveling!)
-    train_df = df[df['date'] < '2023-01-01'].copy()
-    test_df = df[df['date'] >= '2023-01-01'].copy()
+    # Dynamic split: last 1.5 years is test set, everything else is train set
+    max_date = df['date'].max()
+    split_date = max_date - pd.DateOffset(months=18)
+    
+    train_df = df[df['date'] < split_date].copy()
+    test_df = df[df['date'] >= split_date].copy()
     
     # Drop columns that algorithms cannot read (strings/dates)
     cols_to_drop = ['date', 'R_fighter', 'B_fighter']
@@ -34,8 +38,8 @@ def load_and_split_data(filepath: str = "data/processed/ufc-ml-features.csv"):
     X_test = test_df.drop(columns=cols_to_drop + ['Winner'])
     y_test = test_df['Winner']
     
-    logger.info(f"Training on {len(X_train)} fights (Before 2023).")
-    logger.info(f"Testing on {len(X_test)} fights (2023 onwards).")
+    logger.info(f"Training on {len(X_train)} fights (Before {split_date.strftime('%Y-%m-%d')}).")
+    logger.info(f"Testing on {len(X_test)} fights ({split_date.strftime('%Y-%m-%d')} onwards).")
     
     return X_train, X_test, y_train, y_test, X_train.columns
 

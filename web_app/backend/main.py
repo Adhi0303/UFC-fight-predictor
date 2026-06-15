@@ -12,6 +12,7 @@ import asyncio
 from datetime import datetime
 from thefuzz import process
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -21,6 +22,9 @@ sys.path.insert(0, project_root)
 
 from src.models.simulator import run_monte_carlo, FighterProfile
 from src.models.xgboost_predictor import predict_win_probability
+from src.utils.logger import setup_logger
+
+logger = setup_logger()
 
 app = FastAPI(title="Octagon AI — UFC Fight Predictor API")
 
@@ -71,8 +75,15 @@ def load_data():
         grouped['image_url'] = grouped['name'].map(image_mapping).fillna('')
         
         roster_data = grouped.to_dict(orient='records')
+        logger.info(f"Loaded {len(df)} historical fights and {len(roster_data)} fighters into memory.")
     else:
         print(f"Warning: Data file not found at {data_path}")
+
+@app.post("/api/reload-data")
+def reload_server_data():
+    """Endpoint to trigger a hot-reload of the dataset in memory."""
+    load_data()
+    return {"status": "success", "message": "Dataset reloaded successfully"}
 
 
 class PredictRequest(BaseModel):
@@ -697,6 +708,14 @@ async def get_upcoming_card():
                 "event_date": event_date,
                 "matchups": matchups,
             })
+
+    # Save to queue file for the background poller
+    queue_path = os.path.join(project_root, "data", "processed", "queued_fights.json")
+    try:
+        with open(queue_path, "w") as f:
+            json.dump(all_events, f, indent=4)
+    except Exception as e:
+        print(f"Failed to save queued fights: {e}")
 
     return {
         "events": all_events,

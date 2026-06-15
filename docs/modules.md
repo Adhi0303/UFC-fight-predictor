@@ -95,3 +95,25 @@ For each step, we highlight **what you are learning** and **what code is being w
 
 **How to use this tracker:**
 Whenever we start a new coding session, tell me (the agent) which task from this list we are working on. I will write the code for that specific task, explain the ML concepts behind it, and check it off the list once you understand it!
+
+
+
+1. Live Vegas Odds Integration
+Right now, the user has to manually type in the Vegas odds for the fighters (which defaults to -110). We could integrate a free sports betting API (like The-Odds-API). When a user selects two fighters, the app would automatically reach out and grab the real-time live betting lines for that matchup to feed into the prediction engine!
+
+2. Auto-Load "Upcoming Fights"
+Instead of forcing the user to type in fighter names manually, we could add a new tab to the UI called "Upcoming Card". This would automatically scrape or pull the real UFC fight card for the upcoming weekend. The user could just click on the Main Event and immediately see the simulation pop up.
+
+3. Fighter Comparison Radar Charts
+We have the raw data for advanced stats (Significant strike accuracy, takedown defense, etc.). We could add a beautiful interactive "Radar Chart" (using a library like Recharts or Chart.js) to the UI so users can visually compare the physical and technical attributes of the two fighters side-by-side in a spider web graph.
+
+4. Cloud Deployment (Putting it on the Internet!)
+Currently, you are running this on your local machine (npm run dev and uvicorn). We can Dockerize the app and deploy it so that you have a real .com URL.
+
+We can deploy the React Frontend to Vercel or Netlify (Free).
+We can deploy the Python Backend to Render or Railway (Free/Cheap). Then you can share the link with your friends or put it on your resume!
+
+5. Automated Data Retraining Pipeline
+Right now, the XGBoost machine learning model was trained on historical data. We could set up an automated script (using GitHub Actions) that runs every Sunday morning after a UFC event. It would scrape the results of Saturday's fights, add them to the .csv database, and automatically retrain the ML model so it gets smarter over time!
+
+Do any of these jump out at you as something you'd like to tackle next? (Deployment and the Upcoming Fights tab are usually the most exciting next steps!)
