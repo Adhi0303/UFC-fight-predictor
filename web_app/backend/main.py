@@ -161,12 +161,12 @@ def get_fighter_profile(name: str):
     stance = latest.get(f'{prefix}Stance', '—')
     age = _safe_int(latest.get(f'{prefix}age'))
 
-    # Record
+    # Record (Pre-fight)
     wins = _safe_int(latest.get(f'{prefix}wins'))
     losses = _safe_int(latest.get(f'{prefix}losses'))
     draws = _safe_int(latest.get(f'{prefix}draw'))
 
-    # Win methods
+    # Win methods (Pre-fight)
     ko_wins = _safe_int(latest.get(f'{prefix}win_by_KO/TKO'))
     sub_wins = _safe_int(latest.get(f'{prefix}win_by_Submission'))
     dec_unanimous = _safe_int(latest.get(f'{prefix}win_by_Decision_Unanimous'))
@@ -174,14 +174,44 @@ def get_fighter_profile(name: str):
     dec_majority = _safe_int(latest.get(f'{prefix}win_by_Decision_Majority'))
     tko_doc = _safe_int(latest.get(f'{prefix}win_by_TKO_Doctor_Stoppage'))
 
-    # Streaks
+    # Streaks (Pre-fight)
     current_win_streak = _safe_int(latest.get(f'{prefix}current_win_streak'))
     current_lose_streak = _safe_int(latest.get(f'{prefix}current_lose_streak'))
     longest_win_streak = _safe_int(latest.get(f'{prefix}longest_win_streak'))
 
-    # Career
-    total_rounds = _safe_int(latest.get(f'{prefix}total_rounds_fought'))
-    title_bouts = _safe_int(latest.get(f'{prefix}total_title_bouts'))
+    # Career (Pre-fight)
+    total_rounds = _safe_int(latest.get(f'{prefix}total_rounds_fought')) + _safe_int(latest.get('finish_round', 0))
+    title_bouts = _safe_int(latest.get(f'{prefix}total_title_bouts')) + (1 if bool(latest.get('title_bout', False)) else 0)
+
+    # --- APPLY THE RESULT OF THE LATEST FIGHT TO GET TRUE CURRENT STATS ---
+    latest_winner = latest.get('Winner', '')
+    if (latest_side == 'R' and latest_winner == 'Red') or (latest_side == 'B' and latest_winner == 'Blue'):
+        wins += 1
+        current_win_streak += 1
+        current_lose_streak = 0
+        if current_win_streak > longest_win_streak:
+            longest_win_streak = current_win_streak
+        
+        finish_method = str(latest.get('finish', '')).upper()
+        if 'KO' in finish_method or 'TKO' in finish_method:
+            ko_wins += 1
+        elif 'SUB' in finish_method:
+            sub_wins += 1
+        elif 'DEC' in finish_method: 
+            if 'S-DEC' in finish_method or 'SPLIT' in finish_method:
+                dec_split += 1
+            elif 'M-DEC' in finish_method or 'MAJORITY' in finish_method:
+                dec_majority += 1
+            else:
+                dec_unanimous += 1
+    elif latest_winner == 'Draw':
+        draws += 1
+        current_win_streak = 0
+        current_lose_streak = 0
+    elif latest_winner in ['Red', 'Blue']:
+        losses += 1
+        current_lose_streak += 1
+        current_win_streak = 0
 
     # Striking & Grappling
     slpm = _safe_float(latest.get(f'{prefix}avg_SIG_STR_landed'))
