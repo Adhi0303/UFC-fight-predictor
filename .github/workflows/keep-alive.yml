@@ -1,0 +1,21 @@
+name: Keep Hugging Face Space Alive
+
+on:
+  schedule:
+    # Run every 12 hours
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+    # Allows manual triggering from the GitHub Actions tab
+
+jobs:
+  ping-hf-space:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Hugging Face Space
+        run: |
+          echo "Pinging Hugging Face space to prevent sleep..."
+          # Fetch the main space page
+          curl -I https://huggingface.co/spaces/Adhi03/ufc-predictor-api
+          # Also ping the direct API URL if needed
+          curl -I https://adhi03-ufc-predictor-api.hf.space/docs || true
+          echo "Ping complete!"
