@@ -7,16 +7,21 @@ required_columns = [
     "date"
 ]
 
-df = pd.read_csv(
-    "data/raw/original/ufc-master.csv"
-)
+def validate_dataframe(df: pd.DataFrame) -> bool:
+    """Validate that all required UFC columns exist in the dataframe."""
+    print("\nVALIDATION RESULTS\n")
 
-print("\nVALIDATION RESULTS\n")
+    all_columns_present = True
+    for column in required_columns:
+        if column in df.columns:
+            print(f"{column} exists")
+        else:
+            print(f"{column} MISSING")
+            all_columns_present = False
 
-for column in required_columns:
+    return all_columns_present
 
-    if column in df.columns:
-        print(f"{column} exists")
 
-    else:
-        print(f"{column} MISSING")
+if __name__ == "__main__":
+    df = pd.read_csv("data/raw/original/ufc-master.csv")
+    validate_dataframe(df)
